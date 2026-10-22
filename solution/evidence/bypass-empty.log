@@ -1,0 +1,608 @@
+Command: docker run --rm --user 10001:10001 --network host -v /var/folders/8t/8rw7_pg16cx2c2mkh_cvpz8m0000gn/T/toggle-linkage-quality-mfdhw0cd/bypass-empty/workspace:/workspace:ro -v /Users/zhangchengcheng/work/ai-project/Trea/harbor/toggle-linkage-kinematics/tests:/tests:ro -v /var/folders/8t/8rw7_pg16cx2c2mkh_cvpz8m0000gn/T/toggle-linkage-quality-mfdhw0cd/bypass-empty/logs:/logs harbor-quality:toggle-linkage-kinematics bash /tests/test.sh
+Exit: 0
+Reward: 0.0
+stdout:
+Collecting pytest==8.4.1 (from -r /tests/requirements.txt (line 1))
+  Downloading pytest-8.4.1-py3-none-any.whl (365 kB)
+Collecting iniconfig==2.3.1 (from -r /tests/requirements.txt (line 2))
+  Downloading iniconfig-2.3.1-py3-none-any.whl (7.6 kB)
+Collecting packaging==26.3 (from -r /tests/requirements.txt (line 3))
+  Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Collecting pluggy==1.7.0 (from -r /tests/requirements.txt (line 4))
+  Downloading pluggy-1.7.0-py3-none-any.whl (27 kB)
+Collecting pygments==2.21.0 (from -r /tests/requirements.txt (line 5))
+  Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 1.5 MB/s eta 0:00:00
+Installing collected packages: pygments, pluggy, packaging, iniconfig, pytest
+Successfully installed iniconfig-2.3.1 packaging-26.3 pluggy-1.7.0 pygments-2.21.0 pytest-8.4.1
+
+stderr:
+  WARNING: The script pygmentize is installed in '/home/worker/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The scripts py.test and pytest are installed in '/home/worker/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+
+[c1]
+..FF                                                                     [100%]
+=================================== FAILURES ===================================
+__________________ test_c1_branch_negative_is_mirror_solution __________________
+
+    def test_c1_branch_negative_is_mirror_solution():
+        """Choose the opposite circle intersection for branch -1."""
+        from toggle_linkage.geometry import solve_closure
+    
+        positive = _mechanism(1)
+        negative = _mechanism(-1)
+        matched = True
+        separated = []
+        for angle in (40.0, 135.0, 250.0):
+            got = solve_closure(negative, math.radians(angle))
+            expected = _closure_reference(negative, angle)
+            matched = matched and math.isclose(
+                got["coupler_point"][0], expected["B"][0], rel_tol=1e-12, abs_tol=1e-12
+            )
+            matched = matched and math.isclose(
+                got["coupler_point"][1], expected["B"][1], rel_tol=1e-12, abs_tol=1e-12
+            )
+            upper = solve_closure(positive, math.radians(angle))
+            separated.append(math.hypot(
+                got["coupler_point"][0] - upper["coupler_point"][0],
+                got["coupler_point"][1] - upper["coupler_point"][1],
+            ))
+>       assert matched
+E       assert False
+
+/tests/test_outputs.py:484: AssertionError
+________________________ test_c1_grashof_classification ________________________
+
+    def test_c1_grashof_classification():
+        """Identify the shipped crank-rocker and its shortest link."""
+        from toggle_linkage.geometry import classify_grashof, shortest_link
+    
+        mechanism = _mechanism()
+>       assert classify_grashof(mechanism) == "crank-rocker"
+E       AssertionError: assert 'double-crank' == 'crank-rocker'
+E         
+E         - crank-rocker
+E         + double-crank
+
+/tests/test_outputs.py:493: AssertionError
+=============================== warnings summary ===============================
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-v8epplal'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-_1w2ra42'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c1_branch_negative_is_mirror_solution
+FAILED ../tests/test_outputs.py::test_c1_grashof_classification - AssertionEr...
+2 failed, 2 passed, 13 deselected, 2 warnings in 0.03s
+
+[c2]
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_c2_velocity_matches_reference ______________________
+
+    def test_c2_velocity_matches_reference():
+        """Match instantaneous link speeds over three assembly positions."""
+        from toggle_linkage.kinematics import solve_velocity
+    
+        mechanism = _mechanism()
+        speed = 9.5
+        matched = True
+        for angle in (25.0, 145.0, 285.0):
+            state = _closure_reference(mechanism, angle)
+            expected = _velocity_reference(mechanism, state, speed)
+            actual = solve_velocity(mechanism, state, speed)
+            matched = matched and math.isclose(
+                actual["coupler_omega_rad_s"],
+                expected["omega3"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["rocker_omega_rad_s"],
+                expected["omega4"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+>       assert matched
+E       assert False
+
+/tests/test_outputs.py:520: AssertionError
+______________________ test_c2_velocity_closure_residual _______________________
+
+    def test_c2_velocity_closure_residual():
+        """Satisfy the differentiated loop equation for nonzero crank speed."""
+        from toggle_linkage.kinematics import solve_velocity
+    
+        mechanism = _mechanism()
+        angle = 72.0
+        state = _closure_reference(mechanism, angle)
+        actual = solve_velocity(mechanism, state, 11.0)
+        rx = (
+            -mechanism["crank_m"] * math.sin(state["theta2"]) * 11.0
+            - mechanism["coupler_m"]
+            * math.sin(state["theta3"])
+            * actual["coupler_omega_rad_s"]
+            + mechanism["rocker_m"]
+            * math.sin(state["theta4"])
+            * actual["rocker_omega_rad_s"]
+        )
+        ry = (
+            mechanism["crank_m"] * math.cos(state["theta2"]) * 11.0
+            + mechanism["coupler_m"]
+            * math.cos(state["theta3"])
+            * actual["coupler_omega_rad_s"]
+            - mechanism["rocker_m"]
+            * math.cos(state["theta4"])
+            * actual["rocker_omega_rad_s"]
+        )
+>       assert math.hypot(rx, ry) < 1e-10
+E       assert 3.5977795449192964 < 1e-10
+E        +  where 3.5977795449192964 = <built-in function hypot>(-3.0402056266546102, 1.9238418338047827)
+E        +    where <built-in function hypot> = math.hypot
+
+/tests/test_outputs.py:549: AssertionError
+=============================== warnings summary ===============================
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-rj6hazqd'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-tvci_fju'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c2_velocity_matches_reference - assert ...
+FAILED ../tests/test_outputs.py::test_c2_velocity_closure_residual - assert 3...
+2 failed, 1 passed, 14 deselected, 2 warnings in 0.03s
+
+[c3]
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_c3_acceleration_matches_reference ____________________
+
+    def test_c3_acceleration_matches_reference():
+        """Match second-derivative results including centripetal terms."""
+        from toggle_linkage.kinematics import solve_acceleration
+    
+        mechanism = _mechanism()
+        speed = 12.0
+        crank_acceleration = 1.4
+        matched = True
+        for angle in (18.0, 112.0, 268.0):
+            state = _closure_reference(mechanism, angle)
+            velocity = _velocity_reference(mechanism, state, speed)
+            expected = _acceleration_reference(
+                mechanism, state, velocity, speed, crank_acceleration
+            )
+            actual = solve_acceleration(
+                mechanism, state, velocity, speed, crank_acceleration
+            )
+            matched = matched and math.isclose(
+                actual["coupler_alpha_rad_s2"],
+                expected["alpha3"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                actual["rocker_alpha_rad_s2"],
+                expected["alpha4"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+>       assert matched
+E       assert False
+
+/tests/test_outputs.py:603: AssertionError
+____________________ test_c3_acceleration_closure_residual _____________________
+
+    def test_c3_acceleration_closure_residual():
+        """Satisfy the second derivative of the loop equation."""
+        from toggle_linkage.kinematics import solve_acceleration
+    
+        mechanism = _mechanism()
+        speed = 10.5
+        alpha2 = -0.7
+        state = _closure_reference(mechanism, 205.0)
+        velocity = _velocity_reference(mechanism, state, speed)
+        actual = solve_acceleration(mechanism, state, velocity, speed, alpha2)
+        a = mechanism["crank_m"]
+        b = mechanism["coupler_m"]
+        c = mechanism["rocker_m"]
+        s2, c2 = math.sin(state["theta2"]), math.cos(state["theta2"])
+        s3, c3 = math.sin(state["theta3"]), math.cos(state["theta3"])
+        s4, c4 = math.sin(state["theta4"]), math.cos(state["theta4"])
+        w2, w3, w4 = speed, velocity["omega3"], velocity["omega4"]
+        alpha3 = actual["coupler_alpha_rad_s2"]
+        alpha4 = actual["rocker_alpha_rad_s2"]
+        rx = (
+            -a * s2 * alpha2
+            - b * s3 * alpha3
+            + c * s4 * alpha4
+            - a * c2 * w2 * w2
+            - b * c3 * w3 * w3
+            + c * c4 * w4 * w4
+        )
+        ry = (
+            a * c2 * alpha2
+            + b * c3 * alpha3
+            - c * c4 * alpha4
+            - a * s2 * w2 * w2
+            - b * s3 * w3 * w3
+            + c * s4 * w4 * w4
+        )
+>       assert math.hypot(rx, ry) < 1e-9
+E       assert 14.411531692044724 < 1e-09
+E        +  where 14.411531692044724 = <built-in function hypot>(13.430803468993647, 5.225491736485445)
+E        +    where <built-in function hypot> = math.hypot
+
+/tests/test_outputs.py:641: AssertionError
+____________________ test_c3_centripetal_terms_are_present _____________________
+
+    def test_c3_centripetal_terms_are_present():
+        """Produce nonzero link acceleration when crank angular acceleration is zero."""
+        from toggle_linkage.kinematics import solve_acceleration
+    
+        mechanism = _mechanism()
+        speed = 13.0
+        state = _closure_reference(mechanism, 150.0)
+        velocity = _velocity_reference(mechanism, state, speed)
+        expected = _acceleration_reference(mechanism, state, velocity, speed, 0.0)
+        actual = solve_acceleration(mechanism, state, velocity, speed, 0.0)
+        assert abs(expected["alpha4"]) > 1.0
+>       assert math.isclose(
+            actual["rocker_alpha_rad_s2"],
+            expected["alpha4"],
+            rel_tol=1e-11,
+            abs_tol=1e-11,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>(0.0, -24.909792363487874, rel_tol=1e-11, abs_tol=1e-11)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:655: AssertionError
+=============================== warnings summary ===============================
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-wpey0haj'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-f_nwhcta'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c3_acceleration_matches_reference - ass...
+FAILED ../tests/test_outputs.py::test_c3_acceleration_closure_residual - asse...
+FAILED ../tests/test_outputs.py::test_c3_centripetal_terms_are_present - asse...
+3 failed, 14 deselected, 2 warnings in 0.04s
+
+[c4]
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_c4_load_point_and_torque _________________________
+
+    def test_c4_load_point_and_torque():
+        """Place the load and match load, weight, and spring generalized forces."""
+        from toggle_linkage.loads import solve_load
+    
+        mechanism = _mechanism()
+        state = _closure_reference(mechanism, 125.0)
+        velocity = _velocity_reference(mechanism, state, 8.0)
+        angular = _acceleration_reference(mechanism, state, velocity, 8.0, 0.8)
+        matched = True
+        for ratio in (0.35, 0.72, 1.0):
+            load = dict(BASE_LOAD)
+            load["application_ratio"] = ratio
+            expected = _load_reference(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                load,
+                8.0,
+                0.8,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            actual = solve_load(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                load,
+                8.0,
+                0.8,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            matched = matched and math.isclose(
+                actual["load_point"][0],
+                expected["point"][0],
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+            matched = matched and math.isclose(
+                actual["load_point"][1],
+                expected["point"][1],
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+            matched = matched and math.isclose(
+                actual["load_torque_n_m"],
+                expected["load_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["gravity_generalized_torque_n_m"],
+                expected["gravity_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["spring_generalized_torque_n_m"],
+                expected["spring_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["inertial_generalized_torque_n_m"],
+                expected["inertial_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+>       assert matched
+E       assert False
+
+/tests/test_outputs.py:735: AssertionError
+____________________________ test_c4_power_balance _____________________________
+
+    def test_c4_power_balance():
+        """Balance drive, load, gravity, spring, and friction power."""
+        from toggle_linkage.loads import solve_load
+    
+        mechanism = _mechanism()
+        speed = 12.0
+        matched = True
+        for angle in (30.0, 140.0, 250.0):
+            state = _closure_reference(mechanism, angle)
+            velocity = _velocity_reference(mechanism, state, speed)
+            angular = _acceleration_reference(mechanism, state, velocity, speed, 1.2)
+            actual = solve_load(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                BASE_LOAD,
+                speed,
+                1.2,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            expected = _load_reference(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                BASE_LOAD,
+                speed,
+                1.2,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            matched = matched and math.isclose(
+                actual["load_torque_n_m"],
+                expected["load_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_torque_n_m"],
+                expected["drive_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["friction_loss_w"],
+                expected["friction_loss"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["inertial_generalized_torque_n_m"],
+                expected["inertial_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_power_w"]
+                + actual["load_power_w"]
+                + actual["gravity_power_w"]
+                + actual["spring_power_w"]
+                - actual["friction_loss_w"],
+                actual["kinetic_power_w"],
+                rel_tol=1e-12,
+                abs_tol=1e-9,
+            )
+            matched = matched and math.isclose(
+                actual["kinetic_power_w"],
+                expected["kinetic_power"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_power_w"]
+                + actual["load_power_w"]
+                + actual["gravity_power_w"]
+                + actual["spring_power_w"]
+                - actual["friction_loss_w"]
+                - actual["kinetic_power_w"],
+                0.0,
+                rel_tol=1e-12,
+                abs_tol=1e-9,
+            )
+>       assert matched
+E       assert False
+
+/tests/test_outputs.py:846: AssertionError
+=============================== warnings summary ===============================
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-eybne0oo'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-o144eyz7'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c4_load_point_and_torque - assert False
+FAILED ../tests/test_outputs.py::test_c4_power_balance - assert False
+2 failed, 1 passed, 14 deselected, 2 warnings in 0.04s
+
+[c5]
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__________________________ test_c5_cli_report_schema ___________________________
+
+    def test_c5_cli_report_schema():
+        """Produce the required report structure for a valid case."""
+        status, payload, _stderr = _run_cli(_base_case())
+        assert status == 0
+        assert payload is not None
+        report = json.loads(payload)
+        assert set(report) == {"mechanism", "samples", "summary"}
+>       assert len(report["samples"]) == 3
+E       assert 0 == 3
+E        +  where 0 = len([])
+
+/tests/test_outputs.py:856: AssertionError
+___________________ test_c5_creates_missing_parent_directory ___________________
+
+    def test_c5_creates_missing_parent_directory():
+        """Create a missing report directory on the successful path."""
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "case.json"
+            target = root / "pending" / "reports" / "report.json"
+            source.write_text(json.dumps(_base_case()), encoding="utf-8")
+            completed = subprocess.run(
+                [sys.executable, "-m", "toggle_linkage.cli", str(source), str(target)],
+                cwd="/workspace",
+                capture_output=True,
+                text=True,
+                timeout=20,
+            )
+>           assert completed.returncode == 0
+E           AssertionError: assert 1 == 0
+E            +  where 1 = CompletedProcess(args=['/usr/local/bin/python', '-m', 'toggle_linkage.cli', '/tmp/tmp5hti15ja/case.json', '/tmp/tmp5ht...^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: \'/tmp/tmp5hti15ja/pending/reports/report.json\'\n').returncode
+
+/tests/test_outputs.py:906: AssertionError
+____________________ test_c5_invalid_inputs_do_not_replace _____________________
+
+    def test_c5_invalid_inputs_do_not_replace():
+        """Reject malformed cases without replacing an existing report."""
+        cases = []
+        branch_case = _base_case()
+        branch_case["mechanism"]["branch"] = 0
+        cases.append(branch_case)
+        length_case = _base_case()
+        length_case["mechanism"]["rocker_m"] = -0.48
+        cases.append(length_case)
+        ratio_case = _base_case()
+        ratio_case["load"]["application_ratio"] = 0.0
+        cases.append(ratio_case)
+        angle_case = _base_case()
+        angle_case["input"]["crank_angles_deg"] = [0.0, 360.0]
+        cases.append(angle_case)
+        force_case = _base_case()
+        force_case["load"]["force_n"] = float("nan")
+        cases.append(force_case)
+        mass_case = _base_case()
+        mass_case["mass_properties"]["coupler"]["mass_kg"] = 0.0
+        cases.append(mass_case)
+        inertia_case = _base_case()
+        inertia_case["mass_properties"]["crank"]["inertia_kg_m2"] = 0.0
+        cases.append(inertia_case)
+        com_case = _base_case()
+        com_case["mass_properties"]["rocker"]["com_ratio"] = 1.1
+        cases.append(com_case)
+        spring_case = _base_case()
+        spring_case["return_spring"]["stiffness_n_m_per_rad"] = -1.0
+        cases.append(spring_case)
+        friction_case = _base_case()
+        friction_case["joint_friction"]["b_n_m"] = -0.2
+        cases.append(friction_case)
+        outcomes = []
+        for case in cases:
+            status, payload, _stderr = _run_cli(case, existing="previous report")
+            outcomes.append(status != 0 and payload == "previous report")
+>       assert all(outcomes)
+E       assert False
+E        +  where False = all([False, False, False, False, False, False, ...])
+
+/tests/test_outputs.py:948: AssertionError
+=============================== warnings summary ===============================
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-edu7uw25'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-omfm4pjc'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c5_cli_report_schema - assert 0 == 3
+FAILED ../tests/test_outputs.py::test_c5_creates_missing_parent_directory - A...
+FAILED ../tests/test_outputs.py::test_c5_invalid_inputs_do_not_replace - asse...
+3 failed, 14 deselected, 2 warnings in 0.74s
+
+[e2e]
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_e2e_full_cycle_matches_reference _____________________
+
+    def test_e2e_full_cycle_matches_reference():
+        """Match a full sampled cycle from the shipped demonstration case."""
+        case = json.loads(Path("/workspace/data/example.json").read_text(encoding="utf-8"))
+        status, payload, _stderr = _run_cli(case)
+        assert status == 0
+        assert payload is not None
+        report = json.loads(payload)
+        mechanism = case["mechanism"]
+        settings = case["input"]
+        load = case["load"]
+        mass_properties = case["mass_properties"]
+        return_spring = case["return_spring"]
+        joint_friction = case["joint_friction"]
+>       matched = report["mechanism"]["grashof_class"] == "crank-rocker"
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'grashof_class'
+
+/tests/test_outputs.py:964: KeyError
+=============================== warnings summary ===============================
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-xocnftkw'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /home/worker/.local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-e50gmjcl'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_e2e_full_cycle_matches_reference - KeyE...
+1 failed, 16 deselected, 2 warnings in 0.08s

@@ -1,0 +1,46 @@
+{
+  "mechanism": {
+    "ground_m": 0.55,
+    "crank_m": 0.18,
+    "coupler_m": 0.62,
+    "rocker_m": 0.48,
+    "branch": 1
+  },
+  "mass_properties": {
+    "crank": {
+      "mass_kg": 1.2,
+      "com_ratio": 0.45,
+      "inertia_kg_m2": 0.0108
+    },
+    "coupler": {
+      "mass_kg": 0.9,
+      "com_ratio": 0.55,
+      "inertia_kg_m2": 0.0302
+    },
+    "rocker": {
+      "mass_kg": 1.8,
+      "com_ratio": 0.62,
+      "inertia_kg_m2": 0.0213
+    },
+    "gravity_m_s2": 9.80665
+  },
+  "return_spring": {
+    "stiffness_n_m_per_rad": 8.5,
+    "zero_angle_deg": 25.0
+  },
+  "joint_friction": {
+    "o2_n_m": 0.6,
+    "b_n_m": 0.4,
+    "o4_n_m": 0.5
+  },
+  "input": {
+    "crank_angles_deg": [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
+    "crank_speed_rad_s": 12.0,
+    "crank_acceleration_rad_s2": 0.0
+  },
+  "load": {
+    "force_n": 240.0,
+    "direction_deg": -90.0,
+    "application_ratio": 0.72
+  }
+}

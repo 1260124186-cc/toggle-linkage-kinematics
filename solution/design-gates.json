@@ -1,0 +1,115 @@
+{
+  "name": "toggle-linkage-kinematics",
+  "category": "D.3 物理模拟 (Physics Simulation)",
+  "scene": "包装线折翼压紧工位的平面曲柄摇杆机构，按设定装配分支计算一周内连杆位置、传动角，以及载荷、杆重、回位扭簧、铰点摩擦和杆件转动惯量共同作用下的曲柄动态扭矩",
+  "core_task": "补全平面四杆机构闭环求解、速度与加速度分析、传动角、刚体广义惯性力、外载荷与摩擦耗散，并让命令行对非法机构参数做原子拒收",
+  "data_provenance": {
+    "kind": "modeled",
+    "source": "environment/workspace/data/example.json 中是一组演示用机构尺寸、质量与转动惯量、弹簧、铰点摩擦、转速与角加速度、采样角度和压紧载荷；参数由四杆机构约束直接给定，不是现场采集数据，也没有随机采样或隐藏样本"
+  },
+  "answer_verification": "测试端按 O2=(0,0)、O4=(d,0)、A=a(cosθ2,sinθ2) 求圆交点；以 A->O4 左侧为 branch=+1，右侧为 branch=-1。速度与加速度分别求解闭环一阶、二阶线性方程。对 θ2 的单位变化求 A、B 和各杆质心坐标的导数，重力和外载荷用广义力，扭簧用 Qθ4=-k(θ4-θ4_zero)，三个铰点摩擦耗散为 Σμ|Δω|；刚体惯性用 m*a_C·(dC/dθ2)+I_C*alpha*(dθ/dθ2)，最后复算 drive+Q_load+Q_gravity+Q_spring-friction_loss-Q_inertia=0 的功率账。",
+  "environment": {
+    "base_image": "python:3.12.8-slim-bookworm@sha256:2199a62885a12290dc9c5be3ca0681d367576ab7bf037da120e564723292a2f0",
+    "dependencies_locked": true,
+    "allow_internet": true,
+    "network_reason": "机构求值只用 Python 标准库；验证阶段需要按哈希从 PyPI 安装 pytest，本地真实运行还要连接镜像外的模型代理",
+    "architectures": ["amd64", "arm64"]
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "statement": "按给定杆长和 crank_angle 求四杆闭环交点，branch=+1 表示 B 位于有向线段 A->O4 左侧，branch=-1 表示右侧，并识别曲柄摇杆类型",
+      "observable": "两套分支的 B 点坐标、连杆与摇杆绝对角、闭环残差和 Grashof 类型",
+      "expected_basis": "以 A 为圆心、coupler_m 为半径和以 O4 为圆心、rocker_m 为半径求两个圆交点，按 A->O4 的单位法向符号选择；Grashof 用 s+l<=p+q 且最短杆相邻机架判为 crank-rocker",
+      "test_ids": ["T1", "T2", "T3", "T4", "T16"]
+    },
+    {
+      "id": "R2",
+      "statement": "在给定恒定曲柄角速度下，用闭环对时间的导数求连杆和摇杆角速度",
+      "observable": "coupler_omega_rad_s、rocker_omega_rad_s 以及速度闭环残差",
+      "expected_basis": "对 a*exp(iθ2)+b*exp(iθ3)-c*exp(iθ4)-d=0 求导，解关于 ω3、ω4 的二维线性方程",
+      "test_ids": ["T5", "T6", "T7", "T16"]
+    },
+    {
+      "id": "R3",
+      "statement": "用闭环方程二阶导求连杆和摇杆角加速度，必须保留各杆的向心项",
+      "observable": "coupler_alpha_rad_s2、rocker_alpha_rad_s2 以及加速度闭环残差",
+      "expected_basis": "对闭环速度方程再求时间导，右端包含 a*ω2^2、b*ω3^2、c*ω4^2 的三角函数项",
+      "test_ids": ["T8", "T9", "T10", "T16"]
+    },
+    {
+      "id": "R4",
+      "statement": "载荷作用在摇杆从 O4 到 B 的指定比例处；同时计入三根运动杆的重力、绕质心转动惯量、摇杆回位扭簧和 O2/B/O4 三个铰点的库仑摩擦，求曲柄动态扭矩与功率账目",
+      "observable": "工位点、载荷/重力/弹簧/惯性广义力、摩擦耗散、驱动扭矩、动能变化率和完整功率平衡，以及最小传动角",
+      "expected_basis": "P=O4+ratio*(B-O4)，F=force_n*(cos φ,sin φ)，Q_load=(P-O4)×F*(ω4/ω2)；Q_gravity=Σm_i*g·(dC_i/dθ2)；Q_spring=-k(θ4-θ4_zero)*(ω4/ω2)；Q_inertia=Σ[m_i*a_Ci·(dC_i/dθ2)+I_i*alpha_i*(dθ_i/dθ2)]；drive+Q_load+Q_gravity+Q_spring-friction_loss-Q_inertia=0；传动角取两杆方向所在直线的锐角",
+      "test_ids": ["T11", "T12", "T13", "T16"]
+    },
+    {
+      "id": "R5",
+      "statement": "命令行读取固定结构的 JSON，验证杆长、分支、角度、质量与转动惯量、弹簧、摩擦、载荷和有限数值，成功时原子写出完整报告，失败时不覆盖旧文件",
+      "observable": "完整 JSON 字段和汇总值，以及非法输入的非零退出和目标文件不变",
+      "expected_basis": "所有输入先通过有限数、杆长正数、圆交点可行性和 branch∈{-1,1} 校验；成功路径创建目标父目录，在临时文件写完后用 os.replace 替换目标",
+      "test_ids": ["T14", "T15", "T16"]
+    }
+  ],
+  "tests": [
+    {"id": "T1", "kind": "normal", "requirement_ids": ["R1"], "expected": "branch=+1 时多个曲柄角的闭环点与独立圆交点计算一致"},
+    {"id": "T2", "kind": "boundary", "requirement_ids": ["R1"], "expected": "曲柄角 0、90、180、270 度时闭环残差均在 1e-12 内"},
+    {"id": "T3", "kind": "normal", "requirement_ids": ["R1"], "expected": "branch=-1 得到另一侧交点且杆长约束仍满足"},
+    {"id": "T4", "kind": "boundary", "requirement_ids": ["R1"], "expected": "最短杆相邻机架的 Grashof 链识别为 crank-rocker"},
+    {"id": "T5", "kind": "normal", "requirement_ids": ["R2"], "expected": "多个曲柄角下 ω3、ω4 与独立线性方程解一致"},
+    {"id": "T6", "kind": "boundary", "requirement_ids": ["R2"], "expected": "速度闭环 x、y 分量残差均在 1e-10 内"},
+    {"id": "T7", "kind": "combination", "requirement_ids": ["R2"], "expected": "同一几何改变输入转速时角速度按比例缩放"},
+    {"id": "T8", "kind": "normal", "requirement_ids": ["R3"], "expected": "多个曲柄角下 α3、α4 与独立二阶闭环解一致"},
+    {"id": "T9", "kind": "boundary", "requirement_ids": ["R3"], "expected": "加速度闭环 x、y 分量残差均在 1e-9 内"},
+    {"id": "T10", "kind": "combination", "requirement_ids": ["R3"], "expected": "非零曲柄角加速度作为右端附加项正确传入"},
+    {"id": "T11", "kind": "normal", "requirement_ids": ["R4"], "expected": "不同 application_ratio 下载荷点沿摇杆正确缩放，载荷、重力与惯性广义力均与独立复算一致"},
+    {"id": "T12", "kind": "boundary", "requirement_ids": ["R4"], "expected": "传动角落在 0 到 90 度且等于两杆正向夹角或其补角"},
+    {"id": "T13", "kind": "combination", "requirement_ids": ["R4"], "expected": "驱动、载荷、重力、弹簧功率、三个铰点摩擦耗散与机构动能变化率满足完整瞬时功率平衡"},
+    {"id": "T14", "kind": "normal", "requirement_ids": ["R5"], "expected": "示例输入输出完整报告，采样顺序与汇总值正确"},
+    {"id": "T15", "kind": "exception", "requirement_ids": ["R5"], "expected": "非法分支、杆长、角度或非有限载荷非零退出且保留旧文件"},
+    {"id": "T16", "kind": "combination", "requirement_ids": ["R1", "R2", "R3", "R4", "R5"], "expected": "完整一周工况的几何、运动学和载荷结果逐项匹配独立实现"}
+  ],
+  "challenges": [
+    {
+      "id": "C1",
+      "description": "四杆圆交点与装配分支",
+      "failure_mode": "总是取同一个圆交点，忽略 branch 或把两交点顺序写反，导致连杆和摇杆位置镜像错位",
+      "fix_action": "按 A->O4 的单位法向分别选择左右交点，并检查 Grashof 条件",
+      "requirement_ids": ["R1"],
+      "test_ids": ["T1", "T2", "T3", "T4"]
+    },
+    {
+      "id": "C2",
+      "description": "闭环一阶速度方程",
+      "failure_mode": "用角位置差商代替瞬时角速度，或在雅可比里漏掉杆长和三角函数符号",
+      "fix_action": "对闭环位置方程求时间导并解关于 ω3、ω4 的二维线性方程",
+      "requirement_ids": ["R2"],
+      "test_ids": ["T5", "T6", "T7"]
+    },
+    {
+      "id": "C3",
+      "description": "闭环二阶加速度方程",
+      "failure_mode": "把角加速度方程当纯线性问题，漏掉各杆角速度平方产生的向心项",
+      "fix_action": "对速度闭环继续求导，把曲柄角加速度和三个向心项组成的右端一起求解",
+      "requirement_ids": ["R3"],
+      "test_ids": ["T8", "T9", "T10"]
+    },
+    {
+      "id": "C4",
+      "description": "载荷、重力、回位弹簧、铰点摩擦与刚体惯性力的广义力合成",
+      "failure_mode": "漏掉杆重、弹簧或转动惯量，把摩擦当成有符号驱动力，或惯性项只算切向加速度，都会使曲柄扭矩和功率账目错误",
+      "fix_action": "沿摇杆定位载荷点，按虚功求载荷/重力/弹簧广义力，按质心线加速度与角加速度求惯性广义力，再按相对角速度用正耗散扣除三个铰点摩擦功率",
+      "requirement_ids": ["R4"],
+      "test_ids": ["T11", "T12", "T13"]
+    },
+    {
+      "id": "C5",
+      "description": "输入校验与原子写出",
+      "failure_mode": "非法杆长或不可装配角度继续计算并覆盖旧报告",
+      "fix_action": "在计算前验证有限性、正杆长、圆交点可行性和采样范围，成功后才以临时文件替换目标",
+      "requirement_ids": ["R5"],
+      "test_ids": ["T14", "T15", "T16"]
+    }
+  ]
+}

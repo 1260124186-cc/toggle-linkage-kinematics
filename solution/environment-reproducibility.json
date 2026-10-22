@@ -1,0 +1,10 @@
+{
+  "status": "pass",
+  "builds": 2,
+  "no_cache": true,
+  "base_image": "python:3.12.8-slim-bookworm@sha256:2199a62885a12290dc9c5be3ca0681d367576ab7bf037da120e564723292a2f0",
+  "manifest_sha256": [
+    "b50c1451057cf87dde31eebf49bcb59285059ffcd3a6b9aefaaa826bd1bf1580",
+    "b50c1451057cf87dde31eebf49bcb59285059ffcd3a6b9aefaaa826bd1bf1580"
+  ]
+}
