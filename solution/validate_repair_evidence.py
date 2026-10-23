@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -10,16 +11,24 @@ from pathlib import Path
 TASK = Path(__file__).resolve().parents[1]
 
 
-def load(relative: str) -> dict:
-    """Load one JSON evidence file from the task."""
-    return json.loads((TASK / relative).read_text(encoding="utf-8"))
+def load(path: Path) -> dict:
+    """Load one JSON evidence file."""
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def main() -> int:
     """Reject incomplete repair evidence before delivery."""
-    traceability = load("solution/test-traceability.json")
-    mutations = load("solution/mutation-results.json")
-    difficulty = load("solution/difficulty-evidence.json")
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--difficulty-evidence",
+        type=Path,
+        default=TASK.parent / "review" / TASK.name / "gates" / "difficulty-evidence.json",
+    )
+    arguments = parser.parse_args()
+
+    traceability = load(TASK / "solution" / "test-traceability.json")
+    mutations = load(TASK / "solution" / "mutation-results.json")
+    difficulty = load(arguments.difficulty_evidence.expanduser().resolve())
     errors = []
 
     if traceability.get("status") != "pass":

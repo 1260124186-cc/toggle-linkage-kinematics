@@ -180,7 +180,7 @@
       ],
       "test_id": "T15",
       "instruction_quote": "命令应以非零状态退出，并且不能生成新的报告，也不能覆盖已有报告",
-      "assertion_count": 10,
+      "assertion_count": 3,
       "source": "tests/test_outputs.py"
     },
     {

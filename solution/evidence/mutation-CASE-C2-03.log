@@ -14,9 +14,9 @@ ___________________ test_c2_velocity_scales_with_crank_speed ___________________
         "`input.crank_speed_rad_s` 是有限非零曲柄角速度",
     )
     def test_c2_velocity_scales_with_crank_speed():
-        """CASE-C2-03 / R2 / T7: assert the quoted nonzero crank speed scales both speeds."""
+        """CASE-C2-03 / R2 / T7: “`input.crank_speed_rad_s` 是有限非零曲柄角速度”."""
         from toggle_linkage.kinematics import solve_velocity
-    
+
         mechanism = _mechanism()
         state = _closure_reference(mechanism, 190.0)
         slow = solve_velocity(mechanism, state, 4.0)
@@ -37,20 +37,20 @@ E       assert False
 E        +  where False = <built-in function isclose>(2.084743751175984, (0.8398975004703936 * 2.5), rel_tol=1e-12, abs_tol=1e-12)
 E        +    where <built-in function isclose> = math.isclose
 
-/tests/test_outputs.py:656: AssertionError
+/tests/test_outputs.py:766: AssertionError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-fc8s1lct'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-cq_wlfik'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-7vlr4gv9'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-gt6c2uf8'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 =========================== short test summary info ============================
 FAILED ../tests/test_outputs.py::test_c2_velocity_scales_with_crank_speed - a...
-1 failed, 2 warnings in 0.05s
+1 failed, 2 warnings in 0.04s
 
 stderr:
 

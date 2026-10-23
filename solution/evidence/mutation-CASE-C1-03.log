@@ -14,9 +14,9 @@ __________________ test_c1_branch_negative_is_mirror_solution __________________
         "`branch=-1` 选择右侧交点",
     )
     def test_c1_branch_negative_is_mirror_solution():
-        """CASE-C1-03 / R1 / T3: assert branch=-1 returns the quoted right intersection."""
+        """CASE-C1-03 / R1 / T3: “`branch=-1` 选择右侧交点”."""
         from toggle_linkage.geometry import solve_closure
-    
+
         positive = _mechanism(1)
         negative = _mechanism(-1)
         matched = True
@@ -38,14 +38,14 @@ __________________ test_c1_branch_negative_is_mirror_solution __________________
 >       assert matched
 E       assert False
 
-/tests/test_outputs.py:535: AssertionError
+/tests/test_outputs.py:645: AssertionError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-7b1xu7ap'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-po4s0e3j'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-k_5n_znt'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-6ggb4m8l'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "weight_policy": {
+    "version": 1,
+    "basis": "business_priority",
+    "core_min_share": 0.6
+  },
+  "gate_tests": [],
+  "tests": {
+    "test_outputs.py::test_c1_branch_positive_positions": {
+      "weight": 0.05,
+      "priority": "core",
+      "rationale": "闭合位置和曲柄角决定全部后续运动学结果。"
+    },
+    "test_outputs.py::test_c1_closure_at_cardinal_angles": {
+      "weight": 0.05,
+      "priority": "core",
+      "rationale": "闭环残差直接约束几何求解的正确性。"
+    },
+    "test_outputs.py::test_c1_branch_negative_is_mirror_solution": {
+      "weight": 0.05,
+      "priority": "core",
+      "rationale": "第二装配分支错误会使整周机构位置失真。"
+    },
+    "test_outputs.py::test_c1_grashof_classification": {
+      "weight": 0.05,
+      "priority": "core",
+      "rationale": "Grashof 分类决定机构是否满足曲柄连续转动前提。"
+    },
+    "test_outputs.py::test_c2_velocity_matches_reference": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "两杆角速度是载荷功率和摩擦耗散的直接输入。"
+    },
+    "test_outputs.py::test_c2_velocity_closure_residual": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "速度闭环残差用于排除不满足机构约束的速度解。"
+    },
+    "test_outputs.py::test_c2_velocity_scales_with_crank_speed": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "输入转速变化必须线性传播到两杆角速度。"
+    },
+    "test_outputs.py::test_c3_acceleration_matches_reference": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "角加速度直接影响刚体惯性广义力和动能率。"
+    },
+    "test_outputs.py::test_c3_acceleration_closure_residual": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "二阶闭环残差用于确认加速度方程没有被简化。"
+    },
+    "test_outputs.py::test_c3_centripetal_terms_are_present": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "向心项缺失会造成惯性和功率账的系统偏差。"
+    },
+    "test_outputs.py::test_c4_load_point_and_torque": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "载荷点、重力和惯性广义力决定压紧工况的曲柄扭矩。"
+    },
+    "test_outputs.py::test_c4_transmission_angle_range": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "传动角是机构传力可行性的核心几何指标。"
+    },
+    "test_outputs.py::test_c4_power_balance": {
+      "weight": 0.06666666666666667,
+      "priority": "core",
+      "rationale": "完整功率账用于排除载荷、惯性和摩擦的符号错误。"
+    },
+    "test_outputs.py::test_c5_cli_report_schema": {
+      "weight": 0.03333333333333333,
+      "priority": "core",
+      "rationale": "固定 JSON 契约是业务系统消费结果的必要条件。"
+    },
+    "test_outputs.py::test_c5_creates_missing_parent_directory": {
+      "weight": 0.03333333333333333,
+      "priority": "core",
+      "rationale": "成功路径必须按约定创建报告目录。"
+    },
+    "test_outputs.py::test_c5_invalid_inputs_do_not_replace": {
+      "weight": 0.03333333333333333,
+      "priority": "core",
+      "rationale": "非法输入必须失败关闭并保护旧报告。"
+    },
+    "test_outputs.py::test_e2e_full_cycle_matches_reference": {
+      "weight": 0.1,
+      "priority": "core",
+      "rationale": "完整一周工况验证所有物理环节能共同工作。"
+    }
+  }
+}

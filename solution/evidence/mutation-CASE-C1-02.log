@@ -14,17 +14,17 @@ ______________________ test_c1_closure_at_cardinal_angles ______________________
         "`crank*exp(i*crank_angle) + coupler*exp(i*coupler_angle) - rocker*exp(i*rocker_angle) - ground = 0`",
     )
     def test_c1_closure_at_cardinal_angles():
-        """CASE-C1-02 / R1 / T2: assert the quoted complex closure equation at four angles."""
+        """CASE-C1-02 / R1 / T2: “`crank*exp(i*crank_angle) + coupler*exp(i*coupler_angle) - rocker*exp(i*rocker_angle) - ground = 0`”."""
         from toggle_linkage.geometry import solve_closure
-    
+
         mechanism = _mechanism(1)
         residuals = []
         for angle in (0.0, 90.0, 180.0, 270.0):
 >           state = solve_closure(mechanism, math.radians(angle))
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-/tests/test_outputs.py:478: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/tests/test_outputs.py:588:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 mechanism = {'branch': 1, 'coupler_m': 0.62, 'crank_m': 0.18, 'ground_m': 0.55, ...}
 crank_angle_rad = 0.0
@@ -36,7 +36,7 @@ crank_angle_rad = 0.0
         coupler = float(mechanism["coupler_m"])
         rocker = float(mechanism["rocker_m"])
         branch = int(mechanism["branch"])
-    
+
         ax = crank * math.cos(crank_angle_rad)
         ay = crank * math.sin(crank_angle_rad)
         dx = ground - ax
@@ -57,17 +57,17 @@ E           ValueError: coupler and rocker circles do not intersect
 toggle_linkage/geometry.py:59: ValueError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-t3y390wv'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-57xt4dvf'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-5w7_h_ae'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-pwic4ke_'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 =========================== short test summary info ============================
 FAILED ../tests/test_outputs.py::test_c1_closure_at_cardinal_angles - ValueEr...
-1 failed, 2 warnings in 0.05s
+1 failed, 2 warnings in 0.08s
 
 stderr:
 

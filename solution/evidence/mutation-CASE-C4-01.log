@@ -14,9 +14,9 @@ ________________________ test_c4_load_point_and_torque _________________________
         "`P = O4 + application_ratio * (B - O4)`",
     )
     def test_c4_load_point_and_torque():
-        """CASE-C4-01 / R4 / T11: assert the quoted load point and generalized forces."""
+        """CASE-C4-01 / R4 / T11: “`P = O4 + application_ratio * (B - O4)`”."""
         from toggle_linkage.loads import solve_load
-    
+
         mechanism = _mechanism()
         state = _closure_reference(mechanism, 125.0)
         velocity = _velocity_reference(mechanism, state, 8.0)
@@ -121,20 +121,20 @@ E       assert False
 E        +  where False = <built-in function isclose>(0.4294838570856753, 0.5078193499799863, rel_tol=1e-12, abs_tol=1e-12)
 E        +    where <built-in function isclose> = math.isclose
 
-/tests/test_outputs.py:903: AssertionError
+/tests/test_outputs.py:1013: AssertionError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-bwhybvv3'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-a0t4i0yf'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-txqad8b8'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-n0_5e6gf'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 =========================== short test summary info ============================
 FAILED ../tests/test_outputs.py::test_c4_load_point_and_torque - assert False
-1 failed, 2 warnings in 0.04s
+1 failed, 2 warnings in 0.07s
 
 stderr:
 

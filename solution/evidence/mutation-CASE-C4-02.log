@@ -14,9 +14,9 @@ _______________________ test_c4_transmission_angle_range _______________________
         "传动角定义为连杆正向与摇杆正向所在直线的锐角，取值范围为 `0` 到 `90` 度",
     )
     def test_c4_transmission_angle_range():
-        """CASE-C4-02 / R4 / T12: assert the quoted acute transmission angle range."""
+        """CASE-C4-02 / R4 / T12: “传动角定义为连杆正向与摇杆正向所在直线的锐角，取值范围为 `0` 到 `90` 度”."""
         from toggle_linkage.kinematics import transmission_angle_deg
-    
+
         mechanism = _mechanism()
         angles = []
         matched = True
@@ -33,14 +33,14 @@ _______________________ test_c4_transmission_angle_range _______________________
 >       assert matched
 E       assert False
 
-/tests/test_outputs.py:941: AssertionError
+/tests/test_outputs.py:1051: AssertionError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-3mb59wri'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-q7ihfovn'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-56arrifm'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-thvix7qi'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

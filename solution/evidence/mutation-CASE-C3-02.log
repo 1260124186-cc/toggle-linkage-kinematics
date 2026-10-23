@@ -14,9 +14,9 @@ ____________________ test_c3_acceleration_closure_residual _____________________
         "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
     )
     def test_c3_acceleration_closure_residual():
-        """CASE-C3-02 / R3 / T9: assert the quoted second derivative closes in x and y."""
+        """CASE-C3-02 / R3 / T9: “速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出”."""
         from toggle_linkage.kinematics import solve_acceleration
-    
+
         mechanism = _mechanism()
         speed = 10.5
         alpha2 = -0.7
@@ -53,20 +53,20 @@ E       assert 1.7562071485954145 < 1e-09
 E        +  where 1.7562071485954145 = <built-in function hypot>(1.1102230246251565e-15, 1.7562071485954145)
 E        +    where <built-in function hypot> = math.hypot
 
-/tests/test_outputs.py:771: AssertionError
+/tests/test_outputs.py:881: AssertionError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-nln9mgir'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-zoscza5_'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-mkj1iqni'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-h7w4wm_4'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 =========================== short test summary info ============================
 FAILED ../tests/test_outputs.py::test_c3_acceleration_closure_residual - asse...
-1 failed, 2 warnings in 0.06s
+1 failed, 2 warnings in 0.04s
 
 stderr:
 

@@ -11,7 +11,7 @@ ________________________ test_c4_load_point_and_torque _________________________
     def test_c4_load_point_and_torque():
         """CASE-C4-01 / R4 / T11: assert the quoted load point and generalized forces."""
         from toggle_linkage.loads import solve_load
-    
+
         mechanism = _mechanism()
         state = _closure_reference(mechanism, 125.0)
         velocity = _velocity_reference(mechanism, state, 8.0)
@@ -133,7 +133,7 @@ ____________________________ test_c4_power_balance _____________________________
     def test_c4_power_balance():
         """CASE-C4-03 / R4 / T13: assert the quoted instantaneous power equation."""
         from toggle_linkage.loads import solve_load
-    
+
         mechanism = _mechanism()
         speed = 12.0
         matched = True

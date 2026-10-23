@@ -14,9 +14,9 @@ ____________________ test_c3_centripetal_terms_are_present _____________________
         "`a_Ci` 必须在世界坐标系中计算，不能只取切向项",
     )
     def test_c3_centripetal_terms_are_present():
-        """CASE-C3-03 / R3 / T10: assert the quoted world-frame acceleration keeps centripetal terms."""
+        """CASE-C3-03 / R3 / T10: “`a_Ci` 必须在世界坐标系中计算，不能只取切向项”."""
         from toggle_linkage.kinematics import solve_acceleration
-    
+
         mechanism = _mechanism()
         speed = 13.0
         state = _closure_reference(mechanism, 150.0)
@@ -34,14 +34,14 @@ E       assert False
 E        +  where False = <built-in function isclose>(0.0, -24.909792363487874, rel_tol=1e-11, abs_tol=1e-11)
 E        +    where <built-in function isclose> = math.isclose
 
-/tests/test_outputs.py:791: AssertionError
+/tests/test_outputs.py:901: AssertionError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-m5wbcp2p'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-a30pci2h'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-7xa52s1g'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-c5smom8r'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

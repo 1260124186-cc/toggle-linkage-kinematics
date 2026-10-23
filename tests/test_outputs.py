@@ -396,6 +396,29 @@ def _run_cli(case: dict, existing: str | None = None) -> tuple[int, str | None, 
         return completed.returncode, payload, completed.stderr
 
 
+def _run_cli_with_blocked_parent(case: dict) -> tuple[int, str, str]:
+    """Exercise write failure when the report parent is an unwritable file."""
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        source = root / "case.json"
+        blocked_parent = root / "blocked-parent"
+        target = blocked_parent / "report.json"
+        source.write_text(json.dumps(case), encoding="utf-8")
+        blocked_parent.write_text("parent sentinel", encoding="utf-8")
+        completed = subprocess.run(
+            [sys.executable, "-m", "toggle_linkage.cli", str(source), str(target)],
+            cwd="/workspace",
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        return (
+            completed.returncode,
+            blocked_parent.read_text(encoding="utf-8"),
+            completed.stderr,
+        )
+
+
 def _base_case() -> dict:
     """Return a valid three-sample case."""
     return {
@@ -412,6 +435,93 @@ def _base_case() -> dict:
     }
 
 
+def _invalid_cases() -> dict[str, dict]:
+    """Build representative failures for every input contract family."""
+    cases = {}
+
+    missing_root = _base_case()
+    missing_root.pop("load")
+    cases["missing_root"] = missing_root
+
+    branch = _base_case()
+    branch["mechanism"]["branch"] = 0
+    cases["branch"] = branch
+
+    negative_length = _base_case()
+    negative_length["mechanism"]["rocker_m"] = -0.48
+    cases["negative_length"] = negative_length
+
+    nonintersecting = _base_case()
+    nonintersecting["mechanism"]["coupler_m"] = 0.01
+    cases["nonintersecting"] = nonintersecting
+
+    empty_angles = _base_case()
+    empty_angles["input"]["crank_angles_deg"] = []
+    cases["empty_angles"] = empty_angles
+
+    angle_out_of_range = _base_case()
+    angle_out_of_range["input"]["crank_angles_deg"] = [0.0, 360.0]
+    cases["angle_out_of_range"] = angle_out_of_range
+
+    nonfinite_angle = _base_case()
+    nonfinite_angle["input"]["crank_angles_deg"] = [0.0, float("nan")]
+    cases["nonfinite_angle"] = nonfinite_angle
+
+    zero_speed = _base_case()
+    zero_speed["input"]["crank_speed_rad_s"] = 0.0
+    cases["zero_speed"] = zero_speed
+
+    nonfinite_acceleration = _base_case()
+    nonfinite_acceleration["input"]["crank_acceleration_rad_s2"] = float("inf")
+    cases["nonfinite_acceleration"] = nonfinite_acceleration
+
+    negative_force = _base_case()
+    negative_force["load"]["force_n"] = -1.0
+    cases["negative_force"] = negative_force
+
+    nonfinite_direction = _base_case()
+    nonfinite_direction["load"]["direction_deg"] = float("nan")
+    cases["nonfinite_direction"] = nonfinite_direction
+
+    lower_ratio = _base_case()
+    lower_ratio["load"]["application_ratio"] = 0.0
+    cases["lower_ratio"] = lower_ratio
+
+    upper_ratio = _base_case()
+    upper_ratio["load"]["application_ratio"] = 1.01
+    cases["upper_ratio"] = upper_ratio
+
+    zero_mass = _base_case()
+    zero_mass["mass_properties"]["coupler"]["mass_kg"] = 0.0
+    cases["zero_mass"] = zero_mass
+
+    zero_inertia = _base_case()
+    zero_inertia["mass_properties"]["crank"]["inertia_kg_m2"] = 0.0
+    cases["zero_inertia"] = zero_inertia
+
+    invalid_com = _base_case()
+    invalid_com["mass_properties"]["rocker"]["com_ratio"] = 1.1
+    cases["invalid_com"] = invalid_com
+
+    nonpositive_gravity = _base_case()
+    nonpositive_gravity["mass_properties"]["gravity_m_s2"] = 0.0
+    cases["nonpositive_gravity"] = nonpositive_gravity
+
+    negative_stiffness = _base_case()
+    negative_stiffness["return_spring"]["stiffness_n_m_per_rad"] = -1.0
+    cases["negative_stiffness"] = negative_stiffness
+
+    nonfinite_zero_angle = _base_case()
+    nonfinite_zero_angle["return_spring"]["zero_angle_deg"] = float("nan")
+    cases["nonfinite_zero_angle"] = nonfinite_zero_angle
+
+    negative_friction = _base_case()
+    negative_friction["joint_friction"]["b_n_m"] = -0.2
+    cases["negative_friction"] = negative_friction
+
+    return cases
+
+
 @case_contract(
     "CASE-C1-01",
     "R1",
@@ -419,7 +529,7 @@ def _base_case() -> dict:
     "`branch=1` 选择该线左侧的圆交点",
 )
 def test_c1_branch_positive_positions():
-    """CASE-C1-01 / R1 / T1: assert branch=1 selects the quoted left intersection."""
+    """CASE-C1-01 / R1 / T1: “`branch=1` 选择该线左侧的圆交点”."""
     from toggle_linkage.geometry import solve_closure
 
     mechanism = _mechanism(1)
@@ -469,7 +579,7 @@ def test_c1_branch_positive_positions():
     "`crank*exp(i*crank_angle) + coupler*exp(i*coupler_angle) - rocker*exp(i*rocker_angle) - ground = 0`",
 )
 def test_c1_closure_at_cardinal_angles():
-    """CASE-C1-02 / R1 / T2: assert the quoted complex closure equation at four angles."""
+    """CASE-C1-02 / R1 / T2: “`crank*exp(i*crank_angle) + coupler*exp(i*coupler_angle) - rocker*exp(i*rocker_angle) - ground = 0`”."""
     from toggle_linkage.geometry import solve_closure
 
     mechanism = _mechanism(1)
@@ -511,7 +621,7 @@ def test_c1_closure_at_cardinal_angles():
     "`branch=-1` 选择右侧交点",
 )
 def test_c1_branch_negative_is_mirror_solution():
-    """CASE-C1-03 / R1 / T3: assert branch=-1 returns the quoted right intersection."""
+    """CASE-C1-03 / R1 / T3: “`branch=-1` 选择右侧交点”."""
     from toggle_linkage.geometry import solve_closure
 
     positive = _mechanism(1)
@@ -543,7 +653,7 @@ def test_c1_branch_negative_is_mirror_solution():
     "当曲柄是最短杆、与机架相邻且满足 Grashof 条件 `最短杆+最长杆 <= 另外两杆之和` 时，`grashof_class` 写 `crank-rocker`",
 )
 def test_c1_grashof_classification():
-    """CASE-C1-04 / R1 / T4: assert the quoted Grashof rule returns crank-rocker."""
+    """CASE-C1-04 / R1 / T4: “当曲柄是最短杆、与机架相邻且满足 Grashof 条件 `最短杆+最长杆 <= 另外两杆之和` 时，`grashof_class` 写 `crank-rocker`”."""
     from toggle_linkage.geometry import classify_grashof, shortest_link
 
     mechanism = _mechanism()
@@ -558,7 +668,7 @@ def test_c1_grashof_classification():
     "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
 )
 def test_c2_velocity_matches_reference():
-    """CASE-C2-01 / R2 / T5: assert the quoted first derivative gives both link speeds."""
+    """CASE-C2-01 / R2 / T5: “速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出”."""
     from toggle_linkage.kinematics import solve_velocity
 
     mechanism = _mechanism()
@@ -605,7 +715,7 @@ def test_c2_velocity_matches_reference():
     "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
 )
 def test_c2_velocity_closure_residual():
-    """CASE-C2-02 / R2 / T6: assert the quoted first derivative closes in x and y."""
+    """CASE-C2-02 / R2 / T6: “速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出”."""
     from toggle_linkage.kinematics import solve_velocity
 
     mechanism = _mechanism()
@@ -640,7 +750,7 @@ def test_c2_velocity_closure_residual():
     "`input.crank_speed_rad_s` 是有限非零曲柄角速度",
 )
 def test_c2_velocity_scales_with_crank_speed():
-    """CASE-C2-03 / R2 / T7: assert the quoted nonzero crank speed scales both speeds."""
+    """CASE-C2-03 / R2 / T7: “`input.crank_speed_rad_s` 是有限非零曲柄角速度”."""
     from toggle_linkage.kinematics import solve_velocity
 
     mechanism = _mechanism()
@@ -668,7 +778,7 @@ def test_c2_velocity_scales_with_crank_speed():
     "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
 )
 def test_c3_acceleration_matches_reference():
-    """CASE-C3-01 / R3 / T8: assert the quoted second derivative gives both accelerations."""
+    """CASE-C3-01 / R3 / T8: “速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出”."""
     from toggle_linkage.kinematics import solve_acceleration
 
     mechanism = _mechanism()
@@ -734,7 +844,7 @@ def test_c3_acceleration_matches_reference():
     "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
 )
 def test_c3_acceleration_closure_residual():
-    """CASE-C3-02 / R3 / T9: assert the quoted second derivative closes in x and y."""
+    """CASE-C3-02 / R3 / T9: “速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出”."""
     from toggle_linkage.kinematics import solve_acceleration
 
     mechanism = _mechanism()
@@ -778,7 +888,7 @@ def test_c3_acceleration_closure_residual():
     "`a_Ci` 必须在世界坐标系中计算，不能只取切向项",
 )
 def test_c3_centripetal_terms_are_present():
-    """CASE-C3-03 / R3 / T10: assert the quoted world-frame acceleration keeps centripetal terms."""
+    """CASE-C3-03 / R3 / T10: “`a_Ci` 必须在世界坐标系中计算，不能只取切向项”."""
     from toggle_linkage.kinematics import solve_acceleration
 
     mechanism = _mechanism()
@@ -803,7 +913,7 @@ def test_c3_centripetal_terms_are_present():
     "`P = O4 + application_ratio * (B - O4)`",
 )
 def test_c4_load_point_and_torque():
-    """CASE-C4-01 / R4 / T11: assert the quoted load point and generalized forces."""
+    """CASE-C4-01 / R4 / T11: “`P = O4 + application_ratio * (B - O4)`”."""
     from toggle_linkage.loads import solve_load
 
     mechanism = _mechanism()
@@ -922,7 +1032,7 @@ def test_c4_load_point_and_torque():
     "传动角定义为连杆正向与摇杆正向所在直线的锐角，取值范围为 `0` 到 `90` 度",
 )
 def test_c4_transmission_angle_range():
-    """CASE-C4-02 / R4 / T12: assert the quoted acute transmission angle range."""
+    """CASE-C4-02 / R4 / T12: “传动角定义为连杆正向与摇杆正向所在直线的锐角，取值范围为 `0` 到 `90` 度”."""
     from toggle_linkage.kinematics import transmission_angle_deg
 
     mechanism = _mechanism()
@@ -950,7 +1060,7 @@ def test_c4_transmission_angle_range():
     "drive_torque*crank_speed + Q_load*crank_speed + Q_gravity*crank_speed + Q_spring*crank_speed - friction_loss - Q_inertia*crank_speed = 0",
 )
 def test_c4_power_balance():
-    """CASE-C4-03 / R4 / T13: assert the quoted instantaneous power equation."""
+    """CASE-C4-03 / R4 / T13: “`drive_torque*crank_speed + Q_load*crank_speed + Q_gravity*crank_speed + Q_spring*crank_speed - friction_loss - Q_inertia*crank_speed = 0`”."""
     from toggle_linkage.loads import solve_load
 
     mechanism = _mechanism()
@@ -1073,7 +1183,7 @@ def test_c4_power_balance():
     "输出根对象固定包含 `mechanism`、`samples` 和 `summary`",
 )
 def test_c5_cli_report_schema():
-    """CASE-C5-01 / R5 / T14: assert the quoted root and sample output schema."""
+    """CASE-C5-01 / R5 / T14: “输出根对象固定包含 `mechanism`、`samples` 和 `summary`”."""
     status, payload, _stderr = _run_cli(_base_case())
     assert status == 0
     assert payload is not None
@@ -1125,7 +1235,7 @@ def test_c5_cli_report_schema():
     "如果报告路径的父目录尚不存在，成功路径也应创建它",
 )
 def test_c5_creates_missing_parent_directory():
-    """CASE-C5-02 / R5 / T17: assert the quoted missing parent directory is created."""
+    """CASE-C5-02 / R5 / T17: “如果报告路径的父目录尚不存在，成功路径也应创建它”."""
     with tempfile.TemporaryDirectory() as temp:
         root = Path(temp)
         source = root / "case.json"
@@ -1150,47 +1260,15 @@ def test_c5_creates_missing_parent_directory():
     "命令应以非零状态退出，并且不能生成新的报告，也不能覆盖已有报告",
 )
 def test_c5_invalid_inputs_do_not_replace():
-    """CASE-C5-03 / R5 / T15: assert the quoted fail-closed behavior for each bad field."""
-    branch_case = _base_case()
-    branch_case["mechanism"]["branch"] = 0
-    length_case = _base_case()
-    length_case["mechanism"]["rocker_m"] = -0.48
-    ratio_case = _base_case()
-    ratio_case["load"]["application_ratio"] = 0.0
-    angle_case = _base_case()
-    angle_case["input"]["crank_angles_deg"] = [0.0, 360.0]
-    force_case = _base_case()
-    force_case["load"]["force_n"] = float("nan")
-    mass_case = _base_case()
-    mass_case["mass_properties"]["coupler"]["mass_kg"] = 0.0
-    inertia_case = _base_case()
-    inertia_case["mass_properties"]["crank"]["inertia_kg_m2"] = 0.0
-    com_case = _base_case()
-    com_case["mass_properties"]["rocker"]["com_ratio"] = 1.1
-    spring_case = _base_case()
-    spring_case["return_spring"]["stiffness_n_m_per_rad"] = -1.0
-    friction_case = _base_case()
-    friction_case["joint_friction"]["b_n_m"] = -0.2
-    status, payload, _stderr = _run_cli(branch_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(length_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(ratio_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(angle_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(force_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(mass_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(inertia_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(com_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(spring_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
-    status, payload, _stderr = _run_cli(friction_case, existing="previous report")
-    assert status != 0 and payload == "previous report"
+    """CASE-C5-03 / R5 / T15: “命令应以非零状态退出，并且不能生成新的报告，也不能覆盖已有报告”."""
+    failures = {}
+    for name, case in _invalid_cases().items():
+        status, payload, _stderr = _run_cli(case, existing="previous report")
+        failures[name] = status == 0 or payload != "previous report"
+    assert not any(failures.values()), failures
+    status, blocked_parent, _stderr = _run_cli_with_blocked_parent(_base_case())
+    assert status != 0
+    assert blocked_parent == "parent sentinel"
 
 
 @case_contract(
@@ -1200,7 +1278,7 @@ def test_c5_invalid_inputs_do_not_replace():
     "`samples` 保持输入角顺序",
 )
 def test_e2e_full_cycle_matches_reference():
-    """CASE-E2E-01 / T16: assert the quoted full-cycle behavior against independent physics."""
+    """CASE-E2E-01 / T16: “`samples` 保持输入角顺序”."""
     case = json.loads(Path("/workspace/data/example.json").read_text(encoding="utf-8"))
     status, payload, _stderr = _run_cli(case)
     assert status == 0

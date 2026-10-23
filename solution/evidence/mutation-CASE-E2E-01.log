@@ -14,7 +14,7 @@ ____________________ test_e2e_full_cycle_matches_reference _____________________
         "`samples` 保持输入角顺序",
     )
     def test_e2e_full_cycle_matches_reference():
-        """CASE-E2E-01 / T16: assert the quoted full-cycle behavior against independent physics."""
+        """CASE-E2E-01 / T16: “`samples` 保持输入角顺序”."""
         case = json.loads(Path("/workspace/data/example.json").read_text(encoding="utf-8"))
         status, payload, _stderr = _run_cli(case)
         assert status == 0
@@ -143,20 +143,20 @@ E       assert False
 E        +  where False = <built-in function isclose>(-7.2253236438071, -16.209347238435697, rel_tol=1e-10, abs_tol=1e-10)
 E        +    where <built-in function isclose> = math.isclose
 
-/tests/test_outputs.py:1322: AssertionError
+/tests/test_outputs.py:1400: AssertionError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-l4ee82e1'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-io4joef2'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-vqfwhp3v'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-c98y76nc'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 =========================== short test summary info ============================
 FAILED ../tests/test_outputs.py::test_e2e_full_cycle_matches_reference - asse...
-1 failed, 2 warnings in 0.10s
+1 failed, 2 warnings in 0.08s
 
 stderr:
 

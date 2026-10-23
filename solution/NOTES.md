@@ -39,5 +39,5 @@ a*exp(i*theta2) + b*exp(i*theta3) - c*exp(i*theta4) - d = 0
 
 - `solution/test-traceability.json`：17 个测试各自绑定唯一 `case_id`、`R/T`、题面原文和断言数量。
 - `solution/mutation-results.json`：17 个定向错误变体逐项运行对应测试，全部被杀死；原始日志在 `solution/evidence/mutation-*.log`。
-- `solution/difficulty-evidence.json`：记录五条非直译求解轴、七步结构化解法链和当前版本 `none` 档未满分校准。
+- `review/toggle-linkage-kinematics/gates/difficulty-evidence.json`：记录五条非直译求解轴、七步结构化解法链和当前版本 `none` 档未满分校准；审核材料放在题包外，避免模型 trial 校验和循环失效。
 - `solution/validate_repair_evidence.py`：一次校验追溯、变异、难度轴和校准证据完整性。

@@ -14,7 +14,7 @@ ___________________ test_c5_creates_missing_parent_directory ___________________
         "如果报告路径的父目录尚不存在，成功路径也应创建它",
     )
     def test_c5_creates_missing_parent_directory():
-        """CASE-C5-02 / R5 / T17: assert the quoted missing parent directory is created."""
+        """CASE-C5-02 / R5 / T17: “如果报告路径的父目录尚不存在，成功路径也应创建它”."""
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             source = root / "case.json"
@@ -29,16 +29,16 @@ ___________________ test_c5_creates_missing_parent_directory ___________________
             )
 >           assert completed.returncode == 0
 E           assert 2 == 0
-E            +  where 2 = CompletedProcess(args=['/usr/local/bin/python', '-m', 'toggle_linkage.cli', '/tmp/tmpfy5md1rh/case.json', '/tmp/tmpfy5...lculation failed: [Errno 2] No such file or directory: '/tmp/tmpfy5md1rh/pending/reports/.report.json.b_o7ryek.tmp'\n").returncode
+E            +  where 2 = CompletedProcess(args=['/usr/local/bin/python', '-m', 'toggle_linkage.cli', '/tmp/tmpmyx14uf5/case.json', '/tmp/tmpmyx...lculation failed: [Errno 2] No such file or directory: '/tmp/tmpmyx14uf5/pending/reports/.report.json.t2knkezx.tmp'\n").returncode
 
-/tests/test_outputs.py:1141: AssertionError
+/tests/test_outputs.py:1251: AssertionError
 =============================== warnings summary ===============================
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-i7o19k8d'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-1_bu7of7'
     config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
 
 ../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
-  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-cncvltj_'
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-utdvf0gd'
     config.cache.set("cache/lastfailed", self.lastfailed)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

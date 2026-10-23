@@ -11,7 +11,7 @@ ______________________ test_c2_velocity_matches_reference ______________________
     def test_c2_velocity_matches_reference():
         """CASE-C2-01 / R2 / T5: assert the quoted first derivative gives both link speeds."""
         from toggle_linkage.kinematics import solve_velocity
-    
+
         mechanism = _mechanism()
         speed = 9.5
         matched = True
@@ -56,7 +56,7 @@ ______________________ test_c2_velocity_closure_residual _______________________
     def test_c2_velocity_closure_residual():
         """CASE-C2-02 / R2 / T6: assert the quoted first derivative closes in x and y."""
         from toggle_linkage.kinematics import solve_velocity
-    
+
         mechanism = _mechanism()
         angle = 72.0
         state = _closure_reference(mechanism, angle)
