@@ -1,0 +1,178 @@
+{
+  "status": "pass",
+  "task": "toggle-linkage-kinematics",
+  "review_scope": {
+    "E2": "17 个测试均有原文引用、唯一 case_id、R/T 双向映射和直接断言",
+    "E6": "17 个定向错误变体均在对应测试上被杀死",
+    "C6_G5": "给出五条非直译求解轴、七步结构化解法链和当前版本未满分校准"
+  },
+  "non_direct_solving_axes": [
+    {
+      "axis_id": "ND-1",
+      "title": "双装配分支的圆交点构造",
+      "instruction_anchor": "`branch=1` 选择该线左侧的圆交点，`branch=-1` 选择右侧交点",
+      "why_not_direct": "题面给出几何语义但没有给出交点坐标；需要先构造 A->O4 的有向单位向量、圆交投影和左法向，再保持 branch 符号与角度定义一致。",
+      "required_operations": [
+        "构造曲柄端点 A",
+        "求两圆交点沿 A->O4 的投影长度",
+        "按 branch 选择左法向或右法向",
+        "由交点反求 theta3 与 theta4"
+      ],
+      "test_ids": ["T1", "T2", "T3", "T4"]
+    },
+    {
+      "axis_id": "ND-2",
+      "title": "隐式闭环的一阶与二阶微分",
+      "instruction_anchor": "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+      "why_not_direct": "速度不能由相邻角度差商替代，角加速度也不能由一个显式标量公式直接抄出；必须对闭环联立方程两次求导并分别解 2x2 线性系统。",
+      "required_operations": [
+        "建立连杆与摇杆角速度的 2x2 矩阵",
+        "将曲柄角速度放入右端",
+        "对速度方程继续求导",
+        "把三根杆的向心项和非零曲柄角加速度放入二阶右端"
+      ],
+      "test_ids": ["T5", "T6", "T7", "T8", "T9", "T10"]
+    },
+    {
+      "axis_id": "ND-3",
+      "title": "载荷、重力、弹簧与惯性的广义力合成",
+      "instruction_anchor": "`Q_inertia=Σ[m_i*(a_Ci·dC_i/dθ2)+I_Ci*alpha_i*(dtheta_i/dθ2)]`",
+      "why_not_direct": "同一个曲柄角下的力、力矩和惯量必须先统一到曲柄广义坐标；质心线加速度还必须包含世界坐标中的切向和向心两部分，不能只做静态平衡。",
+      "required_operations": [
+        "沿摇杆比例定位载荷点并求叉积力矩",
+        "对 A、B 和三个质心求 d/dtheta2",
+        "由 A、B 点加速度插值三个质心加速度",
+        "组合平动动能项和绕质心转动惯量项"
+      ],
+      "test_ids": ["T11", "T13", "T16"]
+    },
+    {
+      "axis_id": "ND-4",
+      "title": "耗散、动能率与功率符号",
+      "instruction_anchor": "`drive_torque*crank_speed + Q_load*crank_speed + Q_gravity*crank_speed + Q_spring*crank_speed - friction_loss - Q_inertia*crank_speed = 0`",
+      "why_not_direct": "摩擦必须作为正耗散从驱动侧功率中扣除，而不是随角速度符号翻转的驱动力；惯性项则必须作为动能变化率参与同一账目。",
+      "required_operations": [
+        "用三个铰点的相对角速度计算绝对耗散",
+        "由功率平衡反求驱动扭矩",
+        "分别输出载荷、重力、弹簧、摩擦和动能功率",
+        "验证五类功率项的残差"
+      ],
+      "test_ids": ["T12", "T13", "T16"]
+    },
+    {
+      "axis_id": "ND-5",
+      "title": "失败闭合与原子产物",
+      "instruction_anchor": "命令应以非零状态退出，并且不能生成新的报告，也不能覆盖已有报告",
+      "why_not_direct": "需要先验证整个输入和所有采样角，再在成功分支创建父目录和临时文件；不能边算边写，否则中途失败会留下半成品。",
+      "required_operations": [
+        "统一验证六个根对象",
+        "验证有限数、范围、装配可行性和速度矩阵",
+        "成功时创建父目录",
+        "仅在全量计算完成后以 os.replace 原子替换"
+      ],
+      "test_ids": ["T14", "T15", "T17"]
+    }
+  ],
+  "structured_solution_diagnosis": {
+    "steps": [
+      {
+        "step_id": "S1",
+        "depends_on": [],
+        "operation": "由杆长和 crank_angle 求圆交点 B，按 branch 选择左右法向",
+        "outputs": ["B", "theta3", "theta4"],
+        "checks": ["闭环残差", "branch 镜像"],
+        "covered_by": ["T1", "T2", "T3", "T4"]
+      },
+      {
+        "step_id": "S2",
+        "depends_on": ["S1"],
+        "operation": "对闭环位置方程求时间导数，解 omega3 与 omega4",
+        "outputs": ["coupler_speed", "rocker_speed"],
+        "checks": ["速度闭环 x/y 残差", "转速比例"],
+        "covered_by": ["T5", "T6", "T7"]
+      },
+      {
+        "step_id": "S3",
+        "depends_on": ["S2"],
+        "operation": "对速度方程继续求导，加入 alpha2 与全部向心项，解 alpha3 与 alpha4",
+        "outputs": ["coupler_alpha", "rocker_alpha"],
+        "checks": ["加速度闭环 x/y 残差", "alpha2=0 时仍有向心加速度"],
+        "covered_by": ["T8", "T9", "T10"]
+      },
+      {
+        "step_id": "S4",
+        "depends_on": ["S1", "S2"],
+        "operation": "对 A、B 和三个质心求单位曲柄角导数，合成载荷、重力、弹簧广义力",
+        "outputs": ["Q_load", "Q_gravity", "Q_spring", "load_point"],
+        "checks": ["载荷点比例", "广义力独立复算"],
+        "covered_by": ["T11", "T13"]
+      },
+      {
+        "step_id": "S5",
+        "depends_on": ["S1", "S2", "S3"],
+        "operation": "由世界坐标质心加速度和角加速度构造 Q_inertia",
+        "outputs": ["Q_inertia"],
+        "checks": ["切向与向心项同时存在"],
+        "covered_by": ["T10", "T13", "T16"]
+      },
+      {
+        "step_id": "S6",
+        "depends_on": ["S2", "S4", "S5"],
+        "operation": "由完整功率平衡反求 drive_torque，并计算 friction_loss 与 kinetic_power",
+        "outputs": ["drive_torque", "friction_loss", "kinetic_power"],
+        "checks": ["五类功率项残差 <= 1e-9"],
+        "covered_by": ["T12", "T13", "T16"]
+      },
+      {
+        "step_id": "S7",
+        "depends_on": ["S1", "S2", "S3", "S4", "S5", "S6"],
+        "operation": "完成全量采样、schema 组装、父目录创建和原子写出",
+        "outputs": ["REPORT.json"],
+        "checks": ["字段完整", "坏输入不覆盖旧报告", "父目录自动创建"],
+        "covered_by": ["T14", "T15", "T17"]
+      }
+    ],
+    "critical_invariants": [
+      "branch 符号不能在两套交点和角度导出之间翻转",
+      "速度与加速度闭环的 x/y 残差必须分别小于 1e-10 与 1e-9",
+      "质心加速度必须同时有切向和向心项",
+      "摩擦是正耗散，不能作为负驱动功率",
+      "原子写出前不得覆盖已有报告"
+    ]
+  },
+  "calibration": {
+    "job": "toggle-linkage-kinematics-model-20261023152139",
+    "agent": "codex",
+    "model": "deepseek-v4-flash",
+    "reasoning_effort": "none",
+    "n_completed_trials": 1,
+    "n_errored_trials": 0,
+    "mean": 0.3,
+    "passed_groups": ["C1", "C5"],
+    "failed_groups": ["C2", "C3", "C4", "E2E"],
+    "non_full": true,
+    "result_evidence": "solution/evidence/calibration-none-result.json",
+    "group_evidence": {
+      "C2": "solution/evidence/calibration-none-c2.log",
+      "C3": "solution/evidence/calibration-none-c3.log",
+      "C4": "solution/evidence/calibration-none-c4.log",
+      "E2E": "solution/evidence/calibration-none-e2e.log"
+    },
+    "diagnosis": "模型完成了装配几何和命令行失败闭合，但没有同时通过速度闭环、加速度向心项、完整广义力与综合功率账，说明非直译求解轴确实参与了得分。"
+  },
+  "control_calibration": {
+    "job": "toggle-linkage-kinematics-model-20261023150547",
+    "agent": "codex",
+    "model": "deepseek-v4-flash",
+    "reasoning_effort": "minimal",
+    "n_completed_trials": 1,
+    "n_errored_trials": 0,
+    "mean": 1.0,
+    "interpretation": "更高推理预算可以完成本题，说明题目具备可解性；主校准仍采用 none 档的非满分结果，不把控制组满分替代难度证据。"
+  },
+  "mutation_evidence": {
+    "summary": "17 个 case 各自对应一个可执行错误变体，全部被对应测试杀死",
+    "result": "solution/mutation-results.json",
+    "baseline": "solution/evidence/mutation-baseline.log"
+  }
+}

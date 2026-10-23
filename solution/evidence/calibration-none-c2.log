@@ -1,0 +1,91 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+______________________ test_c2_velocity_matches_reference ______________________
+
+    @case_contract(
+        "CASE-C2-01",
+        "R2",
+        "T5",
+        "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+    )
+    def test_c2_velocity_matches_reference():
+        """CASE-C2-01 / R2 / T5: assert the quoted first derivative gives both link speeds."""
+        from toggle_linkage.kinematics import solve_velocity
+    
+        mechanism = _mechanism()
+        speed = 9.5
+        matched = True
+        for angle in (25.0, 145.0, 285.0):
+            state = _closure_reference(mechanism, angle)
+            expected = _velocity_reference(mechanism, state, speed)
+            actual = solve_velocity(mechanism, state, speed)
+            matched = matched and math.isclose(
+                actual["coupler_omega_rad_s"],
+                expected["omega3"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["rocker_omega_rad_s"],
+                expected["omega4"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+        direct_state = _closure_reference(mechanism, 25.0)
+        direct_actual = solve_velocity(mechanism, direct_state, speed)
+        direct_expected = _velocity_reference(mechanism, direct_state, speed)
+>       assert math.isclose(
+            direct_actual["coupler_omega_rad_s"],
+            direct_expected["omega3"],
+            rel_tol=1e-11,
+            abs_tol=1e-11,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>(-19.51690621905918, -3.513043119430653, rel_tol=1e-11, abs_tol=1e-11)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:586: AssertionError
+______________________ test_c2_velocity_closure_residual _______________________
+
+    @case_contract(
+        "CASE-C2-02",
+        "R2",
+        "T6",
+        "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+    )
+    def test_c2_velocity_closure_residual():
+        """CASE-C2-02 / R2 / T6: assert the quoted first derivative closes in x and y."""
+        from toggle_linkage.kinematics import solve_velocity
+    
+        mechanism = _mechanism()
+        angle = 72.0
+        state = _closure_reference(mechanism, angle)
+        actual = solve_velocity(mechanism, state, 11.0)
+        rx = (
+            -mechanism["crank_m"] * math.sin(state["theta2"]) * 11.0
+            - mechanism["coupler_m"]
+            * math.sin(state["theta3"])
+            * actual["coupler_omega_rad_s"]
+            + mechanism["rocker_m"]
+            * math.sin(state["theta4"])
+            * actual["rocker_omega_rad_s"]
+        )
+        ry = (
+            mechanism["crank_m"] * math.cos(state["theta2"]) * 11.0
+            + mechanism["coupler_m"]
+            * math.cos(state["theta3"])
+            * actual["coupler_omega_rad_s"]
+            - mechanism["rocker_m"]
+            * math.cos(state["theta4"])
+            * actual["rocker_omega_rad_s"]
+        )
+>       assert math.hypot(rx, ry) < 1e-10
+E       assert 9.02 < 1e-10
+E        +  where 9.02 = <built-in function hypot>(8.578529776982284, -2.7873332892620266)
+E        +    where <built-in function hypot> = math.hypot
+
+/tests/test_outputs.py:633: AssertionError
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c2_velocity_matches_reference - assert ...
+FAILED ../tests/test_outputs.py::test_c2_velocity_closure_residual - assert 9...
+2 failed, 1 passed, 14 deselected in 0.05s

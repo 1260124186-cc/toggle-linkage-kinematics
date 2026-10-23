@@ -1,0 +1,68 @@
+Command: pytest -q /tests/test_outputs.py::test_c2_velocity_matches_reference
+Mutation: 反转速度方程第一行的曲柄速度项
+File: kinematics.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_c2_velocity_matches_reference ______________________
+
+    @case_contract(
+        "CASE-C2-01",
+        "R2",
+        "T5",
+        "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+    )
+    def test_c2_velocity_matches_reference():
+        """CASE-C2-01 / R2 / T5: assert the quoted first derivative gives both link speeds."""
+        from toggle_linkage.kinematics import solve_velocity
+    
+        mechanism = _mechanism()
+        speed = 9.5
+        matched = True
+        for angle in (25.0, 145.0, 285.0):
+            state = _closure_reference(mechanism, angle)
+            expected = _velocity_reference(mechanism, state, speed)
+            actual = solve_velocity(mechanism, state, speed)
+            matched = matched and math.isclose(
+                actual["coupler_omega_rad_s"],
+                expected["omega3"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["rocker_omega_rad_s"],
+                expected["omega4"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+        direct_state = _closure_reference(mechanism, 25.0)
+        direct_actual = solve_velocity(mechanism, direct_state, speed)
+        direct_expected = _velocity_reference(mechanism, direct_state, speed)
+>       assert math.isclose(
+            direct_actual["coupler_omega_rad_s"],
+            direct_expected["omega3"],
+            rel_tol=1e-11,
+            abs_tol=1e-11,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>(-4.206549666725951, -3.513043119430653, rel_tol=1e-11, abs_tol=1e-11)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:586: AssertionError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-xgmz9rni'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-t3p1ruhf'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c2_velocity_matches_reference - assert ...
+1 failed, 2 warnings in 0.04s
+
+stderr:
+

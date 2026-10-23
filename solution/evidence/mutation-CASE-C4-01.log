@@ -1,0 +1,140 @@
+Command: pytest -q /tests/test_outputs.py::test_c4_load_point_and_torque
+Mutation: 忽略 application_ratio 并把载荷加到摇杆末端
+File: loads.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________________ test_c4_load_point_and_torque _________________________
+
+    @case_contract(
+        "CASE-C4-01",
+        "R4",
+        "T11",
+        "`P = O4 + application_ratio * (B - O4)`",
+    )
+    def test_c4_load_point_and_torque():
+        """CASE-C4-01 / R4 / T11: assert the quoted load point and generalized forces."""
+        from toggle_linkage.loads import solve_load
+    
+        mechanism = _mechanism()
+        state = _closure_reference(mechanism, 125.0)
+        velocity = _velocity_reference(mechanism, state, 8.0)
+        angular = _acceleration_reference(mechanism, state, velocity, 8.0, 0.8)
+        matched = True
+        for ratio in (0.35, 0.72, 1.0):
+            load = dict(BASE_LOAD)
+            load["application_ratio"] = ratio
+            expected = _load_reference(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                load,
+                8.0,
+                0.8,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            actual = solve_load(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                load,
+                8.0,
+                0.8,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            matched = matched and math.isclose(
+                actual["load_point"][0],
+                expected["point"][0],
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+            matched = matched and math.isclose(
+                actual["load_point"][1],
+                expected["point"][1],
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+            matched = matched and math.isclose(
+                actual["load_torque_n_m"],
+                expected["load_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["gravity_generalized_torque_n_m"],
+                expected["gravity_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["spring_generalized_torque_n_m"],
+                expected["spring_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["inertial_generalized_torque_n_m"],
+                expected["inertial_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+        direct_load = dict(BASE_LOAD)
+        direct_load["application_ratio"] = 0.35
+        direct_actual = solve_load(
+            mechanism,
+            state,
+            velocity,
+            angular,
+            direct_load,
+            8.0,
+            0.8,
+            BASE_MASS_PROPERTIES,
+            BASE_RETURN_SPRING,
+            BASE_JOINT_FRICTION,
+        )
+        direct_expected = _load_reference(
+            mechanism,
+            state,
+            velocity,
+            angular,
+            direct_load,
+            8.0,
+            0.8,
+            BASE_MASS_PROPERTIES,
+            BASE_RETURN_SPRING,
+            BASE_JOINT_FRICTION,
+        )
+>       assert math.isclose(
+            direct_actual["load_point"][0],
+            direct_expected["point"][0],
+            rel_tol=1e-12,
+            abs_tol=1e-12,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>(0.4294838570856753, 0.5078193499799863, rel_tol=1e-12, abs_tol=1e-12)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:903: AssertionError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-bwhybvv3'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-txqad8b8'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c4_load_point_and_torque - assert False
+1 failed, 2 warnings in 0.04s
+
+stderr:
+

@@ -1,0 +1,185 @@
+{
+  "status": "pass",
+  "baseline": {
+    "tests_passed": 17,
+    "exit_code": 0,
+    "evidence": "solution/evidence/mutation-baseline.log"
+  },
+  "summary": {
+    "mutants": 17,
+    "killed": 17,
+    "survived": 0
+  },
+  "mutants": [
+    {
+      "case_id": "CASE-C1-01",
+      "test_id": "T1",
+      "test": "test_c1_branch_positive_positions",
+      "file": "geometry.py",
+      "description": "反转 branch=1 的左侧法向符号",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C1-01.log"
+    },
+    {
+      "case_id": "CASE-C1-02",
+      "test_id": "T2",
+      "test": "test_c1_closure_at_cardinal_angles",
+      "file": "geometry.py",
+      "description": "从圆交点投影中删去摇杆长度平方",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C1-02.log"
+    },
+    {
+      "case_id": "CASE-C1-03",
+      "test_id": "T3",
+      "test": "test_c1_branch_negative_is_mirror_solution",
+      "file": "geometry.py",
+      "description": "忽略 branch 输入并固定选择左侧交点",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C1-03.log"
+    },
+    {
+      "case_id": "CASE-C1-04",
+      "test_id": "T4",
+      "test": "test_c1_grashof_classification",
+      "file": "geometry.py",
+      "description": "让 Grashof 分类始终返回 other",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C1-04.log"
+    },
+    {
+      "case_id": "CASE-C2-01",
+      "test_id": "T5",
+      "test": "test_c2_velocity_matches_reference",
+      "file": "kinematics.py",
+      "description": "反转速度方程第一行的曲柄速度项",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C2-01.log"
+    },
+    {
+      "case_id": "CASE-C2-02",
+      "test_id": "T6",
+      "test": "test_c2_velocity_closure_residual",
+      "file": "kinematics.py",
+      "description": "反转速度矩阵中摇杆余弦项的符号",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C2-02.log"
+    },
+    {
+      "case_id": "CASE-C2-03",
+      "test_id": "T7",
+      "test": "test_c2_velocity_scales_with_crank_speed",
+      "file": "kinematics.py",
+      "description": "给摇杆角速度叠加非物理的固定偏置",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C2-03.log"
+    },
+    {
+      "case_id": "CASE-C3-01",
+      "test_id": "T8",
+      "test": "test_c3_acceleration_matches_reference",
+      "file": "kinematics.py",
+      "description": "反转加速度方程中曲柄向心项",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C3-01.log"
+    },
+    {
+      "case_id": "CASE-C3-02",
+      "test_id": "T9",
+      "test": "test_c3_acceleration_closure_residual",
+      "file": "kinematics.py",
+      "description": "反转加速度方程第二行摇杆向心项",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C3-02.log"
+    },
+    {
+      "case_id": "CASE-C3-03",
+      "test_id": "T10",
+      "test": "test_c3_centripetal_terms_are_present",
+      "file": "kinematics.py",
+      "description": "删掉加速度方程中的全部向心项",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C3-03.log"
+    },
+    {
+      "case_id": "CASE-C4-01",
+      "test_id": "T11",
+      "test": "test_c4_load_point_and_torque",
+      "file": "loads.py",
+      "description": "忽略 application_ratio 并把载荷加到摇杆末端",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C4-01.log"
+    },
+    {
+      "case_id": "CASE-C4-02",
+      "test_id": "T12",
+      "test": "test_c4_transmission_angle_range",
+      "file": "kinematics.py",
+      "description": "将传动角错误平移 90 度",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C4-02.log"
+    },
+    {
+      "case_id": "CASE-C4-03",
+      "test_id": "T13",
+      "test": "test_c4_power_balance",
+      "file": "loads.py",
+      "description": "把摩擦耗散当作驱动侧输入",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C4-03.log"
+    },
+    {
+      "case_id": "CASE-C5-01",
+      "test_id": "T14",
+      "test": "test_c5_cli_report_schema",
+      "file": "cli.py",
+      "description": "从每个 sample 中删除 kinetic_power_w",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C5-01.log"
+    },
+    {
+      "case_id": "CASE-C5-02",
+      "test_id": "T17",
+      "test": "test_c5_creates_missing_parent_directory",
+      "file": "cli.py",
+      "description": "不再创建缺失的报告父目录",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C5-02.log"
+    },
+    {
+      "case_id": "CASE-C5-03",
+      "test_id": "T15",
+      "test": "test_c5_invalid_inputs_do_not_replace",
+      "file": "cli.py",
+      "description": "跳过非法载荷比例校验",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-C5-03.log"
+    },
+    {
+      "case_id": "CASE-E2E-01",
+      "test_id": "T16",
+      "test": "test_e2e_full_cycle_matches_reference",
+      "file": "loads.py",
+      "description": "反转回位扭簧力矩符号",
+      "killed": true,
+      "exit_code": 1,
+      "evidence": "solution/evidence/mutation-CASE-E2E-01.log"
+    }
+  ]
+}

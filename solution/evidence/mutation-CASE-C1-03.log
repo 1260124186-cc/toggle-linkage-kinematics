@@ -1,0 +1,57 @@
+Command: pytest -q /tests/test_outputs.py::test_c1_branch_negative_is_mirror_solution
+Mutation: 忽略 branch 输入并固定选择左侧交点
+File: geometry.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_c1_branch_negative_is_mirror_solution __________________
+
+    @case_contract(
+        "CASE-C1-03",
+        "R1",
+        "T3",
+        "`branch=-1` 选择右侧交点",
+    )
+    def test_c1_branch_negative_is_mirror_solution():
+        """CASE-C1-03 / R1 / T3: assert branch=-1 returns the quoted right intersection."""
+        from toggle_linkage.geometry import solve_closure
+    
+        positive = _mechanism(1)
+        negative = _mechanism(-1)
+        matched = True
+        separated = []
+        for angle in (40.0, 135.0, 250.0):
+            got = solve_closure(negative, math.radians(angle))
+            expected = _closure_reference(negative, angle)
+            matched = matched and math.isclose(
+                got["coupler_point"][0], expected["B"][0], rel_tol=1e-12, abs_tol=1e-12
+            )
+            matched = matched and math.isclose(
+                got["coupler_point"][1], expected["B"][1], rel_tol=1e-12, abs_tol=1e-12
+            )
+            upper = solve_closure(positive, math.radians(angle))
+            separated.append(math.hypot(
+                got["coupler_point"][0] - upper["coupler_point"][0],
+                got["coupler_point"][1] - upper["coupler_point"][1],
+            ))
+>       assert matched
+E       assert False
+
+/tests/test_outputs.py:535: AssertionError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-7b1xu7ap'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-k_5n_znt'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c1_branch_negative_is_mirror_solution
+1 failed, 2 warnings in 0.06s
+
+stderr:
+

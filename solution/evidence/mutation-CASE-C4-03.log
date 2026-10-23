@@ -1,0 +1,150 @@
+Command: pytest -q /tests/test_outputs.py::test_c4_power_balance
+Mutation: 把摩擦耗散当作驱动侧输入
+File: loads.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________________ test_c4_power_balance _____________________________
+
+    @case_contract(
+        "CASE-C4-03",
+        "R4",
+        "T13",
+        "drive_torque*crank_speed + Q_load*crank_speed + Q_gravity*crank_speed + Q_spring*crank_speed - friction_loss - Q_inertia*crank_speed = 0",
+    )
+    def test_c4_power_balance():
+        """CASE-C4-03 / R4 / T13: assert the quoted instantaneous power equation."""
+        from toggle_linkage.loads import solve_load
+    
+        mechanism = _mechanism()
+        speed = 12.0
+        matched = True
+        for angle in (30.0, 140.0, 250.0):
+            state = _closure_reference(mechanism, angle)
+            velocity = _velocity_reference(mechanism, state, speed)
+            angular = _acceleration_reference(mechanism, state, velocity, speed, 1.2)
+            actual = solve_load(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                BASE_LOAD,
+                speed,
+                1.2,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            expected = _load_reference(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                BASE_LOAD,
+                speed,
+                1.2,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            matched = matched and math.isclose(
+                actual["load_torque_n_m"],
+                expected["load_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_torque_n_m"],
+                expected["drive_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["friction_loss_w"],
+                expected["friction_loss"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["inertial_generalized_torque_n_m"],
+                expected["inertial_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_power_w"]
+                + actual["load_power_w"]
+                + actual["gravity_power_w"]
+                + actual["spring_power_w"]
+                - actual["friction_loss_w"],
+                actual["kinetic_power_w"],
+                rel_tol=1e-12,
+                abs_tol=1e-9,
+            )
+            matched = matched and math.isclose(
+                actual["kinetic_power_w"],
+                expected["kinetic_power"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_power_w"]
+                + actual["load_power_w"]
+                + actual["gravity_power_w"]
+                + actual["spring_power_w"]
+                - actual["friction_loss_w"]
+                - actual["kinetic_power_w"],
+                0.0,
+                rel_tol=1e-12,
+                abs_tol=1e-9,
+            )
+        direct_state = _closure_reference(mechanism, 30.0)
+        direct_velocity = _velocity_reference(mechanism, direct_state, speed)
+        direct_angular = _acceleration_reference(
+            mechanism, direct_state, direct_velocity, speed, 1.2
+        )
+        direct = solve_load(
+            mechanism,
+            direct_state,
+            direct_velocity,
+            direct_angular,
+            BASE_LOAD,
+            speed,
+            1.2,
+            BASE_MASS_PROPERTIES,
+            BASE_RETURN_SPRING,
+            BASE_JOINT_FRICTION,
+        )
+>       assert math.isclose(
+            direct["drive_power_w"]
+            + direct["load_power_w"]
+            + direct["gravity_power_w"]
+            + direct["spring_power_w"]
+            - direct["friction_loss_w"]
+            - direct["kinetic_power_w"],
+            0.0,
+            rel_tol=1e-12,
+            abs_tol=1e-9,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>((((((-33.6328560120945 + 15.549591906274067) + -15.913873722992902) + 7.485484694715053) - 8.89613053452394) - -17.61552259957434), 0.0, rel_tol=1e-12, abs_tol=1e-09)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:1055: AssertionError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-3zl08vnh'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-mtw9jgzy'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c4_power_balance - assert False
+1 failed, 2 warnings in 0.05s
+
+stderr:
+

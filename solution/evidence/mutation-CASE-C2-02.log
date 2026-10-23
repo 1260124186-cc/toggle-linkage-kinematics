@@ -1,0 +1,63 @@
+Command: pytest -q /tests/test_outputs.py::test_c2_velocity_closure_residual
+Mutation: 反转速度矩阵中摇杆余弦项的符号
+File: kinematics.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_c2_velocity_closure_residual _______________________
+
+    @case_contract(
+        "CASE-C2-02",
+        "R2",
+        "T6",
+        "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+    )
+    def test_c2_velocity_closure_residual():
+        """CASE-C2-02 / R2 / T6: assert the quoted first derivative closes in x and y."""
+        from toggle_linkage.kinematics import solve_velocity
+    
+        mechanism = _mechanism()
+        angle = 72.0
+        state = _closure_reference(mechanism, angle)
+        actual = solve_velocity(mechanism, state, 11.0)
+        rx = (
+            -mechanism["crank_m"] * math.sin(state["theta2"]) * 11.0
+            - mechanism["coupler_m"]
+            * math.sin(state["theta3"])
+            * actual["coupler_omega_rad_s"]
+            + mechanism["rocker_m"]
+            * math.sin(state["theta4"])
+            * actual["rocker_omega_rad_s"]
+        )
+        ry = (
+            mechanism["crank_m"] * math.cos(state["theta2"]) * 11.0
+            + mechanism["coupler_m"]
+            * math.cos(state["theta3"])
+            * actual["coupler_omega_rad_s"]
+            - mechanism["rocker_m"]
+            * math.cos(state["theta4"])
+            * actual["rocker_omega_rad_s"]
+        )
+>       assert math.hypot(rx, ry) < 1e-10
+E       assert 0.27095739165121246 < 1e-10
+E        +  where 0.27095739165121246 = <built-in function hypot>(2.220446049250313e-16, -0.27095739165121246)
+E        +    where <built-in function hypot> = math.hypot
+
+/tests/test_outputs.py:633: AssertionError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-93rz980d'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-v92tzgkj'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c2_velocity_closure_residual - assert 0...
+1 failed, 2 warnings in 0.05s
+
+stderr:
+

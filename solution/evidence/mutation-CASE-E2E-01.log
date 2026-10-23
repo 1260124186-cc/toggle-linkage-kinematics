@@ -1,0 +1,162 @@
+Command: pytest -q /tests/test_outputs.py::test_e2e_full_cycle_matches_reference
+Mutation: 反转回位扭簧力矩符号
+File: loads.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_e2e_full_cycle_matches_reference _____________________
+
+    @case_contract(
+        "CASE-E2E-01",
+        "R1,R2,R3,R4,R5",
+        "T16",
+        "`samples` 保持输入角顺序",
+    )
+    def test_e2e_full_cycle_matches_reference():
+        """CASE-E2E-01 / T16: assert the quoted full-cycle behavior against independent physics."""
+        case = json.loads(Path("/workspace/data/example.json").read_text(encoding="utf-8"))
+        status, payload, _stderr = _run_cli(case)
+        assert status == 0
+        assert payload is not None
+        report = json.loads(payload)
+        mechanism = case["mechanism"]
+        settings = case["input"]
+        load = case["load"]
+        mass_properties = case["mass_properties"]
+        return_spring = case["return_spring"]
+        joint_friction = case["joint_friction"]
+        matched = report["mechanism"]["grashof_class"] == "crank-rocker"
+        matched = matched and report["mechanism"]["shortest_link"] == "crank"
+        for sample, angle in zip(
+            report["samples"], settings["crank_angles_deg"], strict=True
+        ):
+            expected = _reference_sample(
+                mechanism,
+                angle,
+                settings["crank_speed_rad_s"],
+                settings["crank_acceleration_rad_s2"],
+                load,
+                mass_properties,
+                return_spring,
+                joint_friction,
+            )
+            matched = matched and math.isclose(
+                sample["crank_angle_deg"], angle, rel_tol=1e-12, abs_tol=1e-12
+            )
+            matched = matched and math.isclose(
+                sample["coupler_point_m"][0],
+                expected["position"]["B"][0],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                sample["coupler_point_m"][1],
+                expected["position"]["B"][1],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                sample["rocker_omega_rad_s"],
+                expected["velocity"]["omega4"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                sample["rocker_alpha_rad_s2"],
+                expected["acceleration"]["alpha4"],
+                rel_tol=1e-9,
+                abs_tol=1e-9,
+            )
+            matched = matched and math.isclose(
+                sample["drive_torque_n_m"],
+                expected["load"]["drive_torque"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                sample["gravity_generalized_torque_n_m"],
+                expected["load"]["gravity_generalized"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                sample["spring_generalized_torque_n_m"],
+                expected["load"]["spring_generalized"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                sample["friction_loss_w"],
+                expected["load"]["friction_loss"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                sample["inertial_generalized_torque_n_m"],
+                expected["load"]["inertial_generalized"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                sample["kinetic_power_w"],
+                expected["load"]["kinetic_power"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                sample["transmission_angle_deg"],
+                expected["transmission"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+        first_sample = report["samples"][0]
+        first_expected = _reference_sample(
+            mechanism,
+            settings["crank_angles_deg"][0],
+            settings["crank_speed_rad_s"],
+            settings["crank_acceleration_rad_s2"],
+            load,
+            mass_properties,
+            return_spring,
+            joint_friction,
+        )
+        assert math.isclose(
+            first_sample["coupler_point_m"][0],
+            first_expected["position"]["B"][0],
+            rel_tol=1e-11,
+            abs_tol=1e-11,
+        )
+        assert math.isclose(
+            first_sample["rocker_omega_rad_s"],
+            first_expected["velocity"]["omega4"],
+            rel_tol=1e-10,
+            abs_tol=1e-10,
+        )
+>       assert math.isclose(
+            first_sample["drive_torque_n_m"],
+            first_expected["load"]["drive_torque"],
+            rel_tol=1e-10,
+            abs_tol=1e-10,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>(-7.2253236438071, -16.209347238435697, rel_tol=1e-10, abs_tol=1e-10)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:1322: AssertionError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-l4ee82e1'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-vqfwhp3v'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_e2e_full_cycle_matches_reference - asse...
+1 failed, 2 warnings in 0.10s
+
+stderr:
+

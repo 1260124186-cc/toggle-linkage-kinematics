@@ -1,0 +1,203 @@
+{
+  "status": "pass",
+  "summary": {
+    "test_count": 17,
+    "unique_case_ids": 17,
+    "exact_instruction_quotes": 17,
+    "direct_assertion_tests": 17
+  },
+  "records": [
+    {
+      "case_id": "CASE-C1-01",
+      "function": "test_c1_branch_positive_positions",
+      "requirement_ids": [
+        "R1"
+      ],
+      "test_id": "T1",
+      "instruction_quote": "`branch=1` 选择该线左侧的圆交点",
+      "assertion_count": 3,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C1-02",
+      "function": "test_c1_closure_at_cardinal_angles",
+      "requirement_ids": [
+        "R1"
+      ],
+      "test_id": "T2",
+      "instruction_quote": "`crank*exp(i*crank_angle) + coupler*exp(i*coupler_angle) - rocker*exp(i*rocker_angle) - ground = 0`",
+      "assertion_count": 1,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C1-03",
+      "function": "test_c1_branch_negative_is_mirror_solution",
+      "requirement_ids": [
+        "R1"
+      ],
+      "test_id": "T3",
+      "instruction_quote": "`branch=-1` 选择右侧交点",
+      "assertion_count": 2,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C1-04",
+      "function": "test_c1_grashof_classification",
+      "requirement_ids": [
+        "R1"
+      ],
+      "test_id": "T4",
+      "instruction_quote": "当曲柄是最短杆、与机架相邻且满足 Grashof 条件 `最短杆+最长杆 <= 另外两杆之和` 时，`grashof_class` 写 `crank-rocker`",
+      "assertion_count": 2,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C2-01",
+      "function": "test_c2_velocity_matches_reference",
+      "requirement_ids": [
+        "R2"
+      ],
+      "test_id": "T5",
+      "instruction_quote": "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+      "assertion_count": 3,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C2-02",
+      "function": "test_c2_velocity_closure_residual",
+      "requirement_ids": [
+        "R2"
+      ],
+      "test_id": "T6",
+      "instruction_quote": "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+      "assertion_count": 1,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C2-03",
+      "function": "test_c2_velocity_scales_with_crank_speed",
+      "requirement_ids": [
+        "R2"
+      ],
+      "test_id": "T7",
+      "instruction_quote": "`input.crank_speed_rad_s` 是有限非零曲柄角速度",
+      "assertion_count": 2,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C3-01",
+      "function": "test_c3_acceleration_matches_reference",
+      "requirement_ids": [
+        "R3"
+      ],
+      "test_id": "T8",
+      "instruction_quote": "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+      "assertion_count": 3,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C3-02",
+      "function": "test_c3_acceleration_closure_residual",
+      "requirement_ids": [
+        "R3"
+      ],
+      "test_id": "T9",
+      "instruction_quote": "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+      "assertion_count": 1,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C3-03",
+      "function": "test_c3_centripetal_terms_are_present",
+      "requirement_ids": [
+        "R3"
+      ],
+      "test_id": "T10",
+      "instruction_quote": "`a_Ci` 必须在世界坐标系中计算，不能只取切向项",
+      "assertion_count": 2,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C4-01",
+      "function": "test_c4_load_point_and_torque",
+      "requirement_ids": [
+        "R4"
+      ],
+      "test_id": "T11",
+      "instruction_quote": "`P = O4 + application_ratio * (B - O4)`",
+      "assertion_count": 3,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C4-02",
+      "function": "test_c4_transmission_angle_range",
+      "requirement_ids": [
+        "R4"
+      ],
+      "test_id": "T12",
+      "instruction_quote": "传动角定义为连杆正向与摇杆正向所在直线的锐角，取值范围为 `0` 到 `90` 度",
+      "assertion_count": 3,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C4-03",
+      "function": "test_c4_power_balance",
+      "requirement_ids": [
+        "R4"
+      ],
+      "test_id": "T13",
+      "instruction_quote": "drive_torque*crank_speed + Q_load*crank_speed + Q_gravity*crank_speed + Q_spring*crank_speed - friction_loss - Q_inertia*crank_speed = 0",
+      "assertion_count": 2,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C5-01",
+      "function": "test_c5_cli_report_schema",
+      "requirement_ids": [
+        "R5"
+      ],
+      "test_id": "T14",
+      "instruction_quote": "输出根对象固定包含 `mechanism`、`samples` 和 `summary`",
+      "assertion_count": 8,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C5-02",
+      "function": "test_c5_creates_missing_parent_directory",
+      "requirement_ids": [
+        "R5"
+      ],
+      "test_id": "T17",
+      "instruction_quote": "如果报告路径的父目录尚不存在，成功路径也应创建它",
+      "assertion_count": 3,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-C5-03",
+      "function": "test_c5_invalid_inputs_do_not_replace",
+      "requirement_ids": [
+        "R5"
+      ],
+      "test_id": "T15",
+      "instruction_quote": "命令应以非零状态退出，并且不能生成新的报告，也不能覆盖已有报告",
+      "assertion_count": 10,
+      "source": "tests/test_outputs.py"
+    },
+    {
+      "case_id": "CASE-E2E-01",
+      "function": "test_e2e_full_cycle_matches_reference",
+      "requirement_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5"
+      ],
+      "test_id": "T16",
+      "instruction_quote": "`samples` 保持输入角顺序",
+      "assertion_count": 6,
+      "source": "tests/test_outputs.py"
+    }
+  ],
+  "errors": []
+}

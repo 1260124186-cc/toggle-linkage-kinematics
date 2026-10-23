@@ -1,0 +1,255 @@
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_c4_load_point_and_torque _________________________
+
+    @case_contract(
+        "CASE-C4-01",
+        "R4",
+        "T11",
+        "`P = O4 + application_ratio * (B - O4)`",
+    )
+    def test_c4_load_point_and_torque():
+        """CASE-C4-01 / R4 / T11: assert the quoted load point and generalized forces."""
+        from toggle_linkage.loads import solve_load
+    
+        mechanism = _mechanism()
+        state = _closure_reference(mechanism, 125.0)
+        velocity = _velocity_reference(mechanism, state, 8.0)
+        angular = _acceleration_reference(mechanism, state, velocity, 8.0, 0.8)
+        matched = True
+        for ratio in (0.35, 0.72, 1.0):
+            load = dict(BASE_LOAD)
+            load["application_ratio"] = ratio
+            expected = _load_reference(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                load,
+                8.0,
+                0.8,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            actual = solve_load(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                load,
+                8.0,
+                0.8,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            matched = matched and math.isclose(
+                actual["load_point"][0],
+                expected["point"][0],
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+            matched = matched and math.isclose(
+                actual["load_point"][1],
+                expected["point"][1],
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+            matched = matched and math.isclose(
+                actual["load_torque_n_m"],
+                expected["load_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["gravity_generalized_torque_n_m"],
+                expected["gravity_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["spring_generalized_torque_n_m"],
+                expected["spring_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["inertial_generalized_torque_n_m"],
+                expected["inertial_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+        direct_load = dict(BASE_LOAD)
+        direct_load["application_ratio"] = 0.35
+        direct_actual = solve_load(
+            mechanism,
+            state,
+            velocity,
+            angular,
+            direct_load,
+            8.0,
+            0.8,
+            BASE_MASS_PROPERTIES,
+            BASE_RETURN_SPRING,
+            BASE_JOINT_FRICTION,
+        )
+        direct_expected = _load_reference(
+            mechanism,
+            state,
+            velocity,
+            angular,
+            direct_load,
+            8.0,
+            0.8,
+            BASE_MASS_PROPERTIES,
+            BASE_RETURN_SPRING,
+            BASE_JOINT_FRICTION,
+        )
+        assert math.isclose(
+            direct_actual["load_point"][0],
+            direct_expected["point"][0],
+            rel_tol=1e-12,
+            abs_tol=1e-12,
+        )
+        assert math.isclose(
+            direct_actual["load_point"][1],
+            direct_expected["point"][1],
+            rel_tol=1e-12,
+            abs_tol=1e-12,
+        )
+>       assert matched
+E       assert False
+
+/tests/test_outputs.py:915: AssertionError
+____________________________ test_c4_power_balance _____________________________
+
+    @case_contract(
+        "CASE-C4-03",
+        "R4",
+        "T13",
+        "drive_torque*crank_speed + Q_load*crank_speed + Q_gravity*crank_speed + Q_spring*crank_speed - friction_loss - Q_inertia*crank_speed = 0",
+    )
+    def test_c4_power_balance():
+        """CASE-C4-03 / R4 / T13: assert the quoted instantaneous power equation."""
+        from toggle_linkage.loads import solve_load
+    
+        mechanism = _mechanism()
+        speed = 12.0
+        matched = True
+        for angle in (30.0, 140.0, 250.0):
+            state = _closure_reference(mechanism, angle)
+            velocity = _velocity_reference(mechanism, state, speed)
+            angular = _acceleration_reference(mechanism, state, velocity, speed, 1.2)
+            actual = solve_load(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                BASE_LOAD,
+                speed,
+                1.2,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            expected = _load_reference(
+                mechanism,
+                state,
+                velocity,
+                angular,
+                BASE_LOAD,
+                speed,
+                1.2,
+                BASE_MASS_PROPERTIES,
+                BASE_RETURN_SPRING,
+                BASE_JOINT_FRICTION,
+            )
+            matched = matched and math.isclose(
+                actual["load_torque_n_m"],
+                expected["load_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_torque_n_m"],
+                expected["drive_torque"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["friction_loss_w"],
+                expected["friction_loss"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["inertial_generalized_torque_n_m"],
+                expected["inertial_generalized"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_power_w"]
+                + actual["load_power_w"]
+                + actual["gravity_power_w"]
+                + actual["spring_power_w"]
+                - actual["friction_loss_w"],
+                actual["kinetic_power_w"],
+                rel_tol=1e-12,
+                abs_tol=1e-9,
+            )
+            matched = matched and math.isclose(
+                actual["kinetic_power_w"],
+                expected["kinetic_power"],
+                rel_tol=1e-11,
+                abs_tol=1e-11,
+            )
+            matched = matched and math.isclose(
+                actual["drive_power_w"]
+                + actual["load_power_w"]
+                + actual["gravity_power_w"]
+                + actual["spring_power_w"]
+                - actual["friction_loss_w"]
+                - actual["kinetic_power_w"],
+                0.0,
+                rel_tol=1e-12,
+                abs_tol=1e-9,
+            )
+        direct_state = _closure_reference(mechanism, 30.0)
+        direct_velocity = _velocity_reference(mechanism, direct_state, speed)
+        direct_angular = _acceleration_reference(
+            mechanism, direct_state, direct_velocity, speed, 1.2
+        )
+        direct = solve_load(
+            mechanism,
+            direct_state,
+            direct_velocity,
+            direct_angular,
+            BASE_LOAD,
+            speed,
+            1.2,
+            BASE_MASS_PROPERTIES,
+            BASE_RETURN_SPRING,
+            BASE_JOINT_FRICTION,
+        )
+>       assert math.isclose(
+            direct["drive_power_w"]
+            + direct["load_power_w"]
+            + direct["gravity_power_w"]
+            + direct["spring_power_w"]
+            - direct["friction_loss_w"]
+            - direct["kinetic_power_w"],
+            0.0,
+            rel_tol=1e-12,
+            abs_tol=1e-9,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>((((((51.14746590707908 + 15.549591906274069) + -11.058114604551164) + 7.485484694715053) - 8.89613053452394) - -54.2282973689931), 0.0, rel_tol=1e-12, abs_tol=1e-09)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:1055: AssertionError
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c4_load_point_and_torque - assert False
+FAILED ../tests/test_outputs.py::test_c4_power_balance - assert False
+2 failed, 1 passed, 14 deselected in 0.16s

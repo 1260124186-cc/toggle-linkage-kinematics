@@ -2,7 +2,7 @@
   "name": "toggle-linkage-kinematics",
   "category": "D.3 物理模拟 (Physics Simulation)",
   "scene": "包装线折翼压紧工位的平面曲柄摇杆机构，按设定装配分支计算一周内连杆位置、传动角，以及载荷、杆重、回位扭簧、铰点摩擦和杆件转动惯量共同作用下的曲柄动态扭矩",
-  "core_task": "补全平面四杆机构闭环求解、速度与加速度分析、传动角、刚体广义惯性力、外载荷与摩擦耗散，并让命令行对非法机构参数做原子拒收",
+  "core_task": "补全平面四杆机构闭环求解、速度与加速度分析、传动角、刚体广义惯性力、外载荷与摩擦耗散，并让命令行对非法机构参数做原子拒绝",
   "data_provenance": {
     "kind": "modeled",
     "source": "environment/workspace/data/example.json 中是一组演示用机构尺寸、质量与转动惯量、弹簧、铰点摩擦、转速与角加速度、采样角度和压紧载荷；参数由四杆机构约束直接给定，不是现场采集数据，也没有随机采样或隐藏样本"
@@ -12,7 +12,7 @@
     "base_image": "python:3.12.8-slim-bookworm@sha256:2199a62885a12290dc9c5be3ca0681d367576ab7bf037da120e564723292a2f0",
     "dependencies_locked": true,
     "allow_internet": true,
-    "network_reason": "机构求值只用 Python 标准库；验证阶段需要按哈希从 PyPI 安装 pytest，本地真实运行还要连接镜像外的模型代理",
+    "network_reason": "机构求值和验证阶段都只用随包依赖，pytest wheel 位于 tests/wheels；任务环境允许联网仅为代码代理连接镜像外本地模型代理",
     "architectures": ["amd64", "arm64"]
   },
   "requirements": [
@@ -49,7 +49,7 @@
       "statement": "命令行读取固定结构的 JSON，验证杆长、分支、角度、质量与转动惯量、弹簧、摩擦、载荷和有限数值，成功时原子写出完整报告，失败时不覆盖旧文件",
       "observable": "完整 JSON 字段和汇总值，以及非法输入的非零退出和目标文件不变",
       "expected_basis": "所有输入先通过有限数、杆长正数、圆交点可行性和 branch∈{-1,1} 校验；成功路径创建目标父目录，在临时文件写完后用 os.replace 替换目标",
-      "test_ids": ["T14", "T15", "T16"]
+      "test_ids": ["T14", "T15", "T16", "T17"]
     }
   ],
   "tests": [
@@ -68,7 +68,8 @@
     {"id": "T13", "kind": "combination", "requirement_ids": ["R4"], "expected": "驱动、载荷、重力、弹簧功率、三个铰点摩擦耗散与机构动能变化率满足完整瞬时功率平衡"},
     {"id": "T14", "kind": "normal", "requirement_ids": ["R5"], "expected": "示例输入输出完整报告，采样顺序与汇总值正确"},
     {"id": "T15", "kind": "exception", "requirement_ids": ["R5"], "expected": "非法分支、杆长、角度或非有限载荷非零退出且保留旧文件"},
-    {"id": "T16", "kind": "combination", "requirement_ids": ["R1", "R2", "R3", "R4", "R5"], "expected": "完整一周工况的几何、运动学和载荷结果逐项匹配独立实现"}
+    {"id": "T16", "kind": "combination", "requirement_ids": ["R1", "R2", "R3", "R4", "R5"], "expected": "完整一周工况的几何、运动学和载荷结果逐项匹配独立实现"},
+    {"id": "T17", "kind": "boundary", "requirement_ids": ["R5"], "expected": "报告父目录不存在时成功创建并写出完整 JSON"}
   ],
   "challenges": [
     {
@@ -109,7 +110,7 @@
       "failure_mode": "非法杆长或不可装配角度继续计算并覆盖旧报告",
       "fix_action": "在计算前验证有限性、正杆长、圆交点可行性和采样范围，成功后才以临时文件替换目标",
       "requirement_ids": ["R5"],
-      "test_ids": ["T14", "T15", "T16"]
+      "test_ids": ["T14", "T15", "T17"]
     }
   ]
 }

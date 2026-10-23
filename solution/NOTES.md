@@ -34,3 +34,10 @@ a*exp(i*theta2) + b*exp(i*theta3) - c*exp(i*theta4) - d = 0
 - C3：闭环二阶加速度方程和向心项，对应 `kinematics.py` 的加速度部分。
 - C4：沿摇杆定位载荷点，用虚功求载荷/重力/弹簧广义力，并用质心线加速度与角加速度求刚体惯性广义力，对应 `loads.py`。
 - C5：输入校验、速度和装配可行性检查以及原子写出，对应 `cli.py`。
+
+## 返修证据
+
+- `solution/test-traceability.json`：17 个测试各自绑定唯一 `case_id`、`R/T`、题面原文和断言数量。
+- `solution/mutation-results.json`：17 个定向错误变体逐项运行对应测试，全部被杀死；原始日志在 `solution/evidence/mutation-*.log`。
+- `solution/difficulty-evidence.json`：记录五条非直译求解轴、七步结构化解法链和当前版本 `none` 档未满分校准。
+- `solution/validate_repair_evidence.py`：一次校验追溯、变异、难度轴和校准证据完整性。

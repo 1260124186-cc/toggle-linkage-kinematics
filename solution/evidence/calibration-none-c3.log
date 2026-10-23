@@ -1,0 +1,150 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_c3_acceleration_matches_reference ____________________
+
+    @case_contract(
+        "CASE-C3-01",
+        "R3",
+        "T8",
+        "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+    )
+    def test_c3_acceleration_matches_reference():
+        """CASE-C3-01 / R3 / T8: assert the quoted second derivative gives both accelerations."""
+        from toggle_linkage.kinematics import solve_acceleration
+    
+        mechanism = _mechanism()
+        speed = 12.0
+        crank_acceleration = 1.4
+        matched = True
+        for angle in (18.0, 112.0, 268.0):
+            state = _closure_reference(mechanism, angle)
+            velocity = _velocity_reference(mechanism, state, speed)
+            expected = _acceleration_reference(
+                mechanism, state, velocity, speed, crank_acceleration
+            )
+            actual = solve_acceleration(
+                mechanism, state, velocity, speed, crank_acceleration
+            )
+            matched = matched and math.isclose(
+                actual["coupler_alpha_rad_s2"],
+                expected["alpha3"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+            matched = matched and math.isclose(
+                actual["rocker_alpha_rad_s2"],
+                expected["alpha4"],
+                rel_tol=1e-10,
+                abs_tol=1e-10,
+            )
+        direct_state = _closure_reference(mechanism, 18.0)
+        direct_velocity = _velocity_reference(mechanism, direct_state, speed)
+        direct_actual = solve_acceleration(
+            mechanism,
+            direct_state,
+            direct_velocity,
+            speed,
+            crank_acceleration,
+        )
+        direct_expected = _acceleration_reference(
+            mechanism,
+            direct_state,
+            direct_velocity,
+            speed,
+            crank_acceleration,
+        )
+>       assert math.isclose(
+            direct_actual["coupler_alpha_rad_s2"],
+            direct_expected["alpha3"],
+            rel_tol=1e-10,
+            abs_tol=1e-10,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>(149.92988280031372, 51.267969625068986, rel_tol=1e-10, abs_tol=1e-10)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:715: AssertionError
+____________________ test_c3_acceleration_closure_residual _____________________
+
+    @case_contract(
+        "CASE-C3-02",
+        "R3",
+        "T9",
+        "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+    )
+    def test_c3_acceleration_closure_residual():
+        """CASE-C3-02 / R3 / T9: assert the quoted second derivative closes in x and y."""
+        from toggle_linkage.kinematics import solve_acceleration
+    
+        mechanism = _mechanism()
+        speed = 10.5
+        alpha2 = -0.7
+        state = _closure_reference(mechanism, 205.0)
+        velocity = _velocity_reference(mechanism, state, speed)
+        actual = solve_acceleration(mechanism, state, velocity, speed, alpha2)
+        a = mechanism["crank_m"]
+        b = mechanism["coupler_m"]
+        c = mechanism["rocker_m"]
+        s2, c2 = math.sin(state["theta2"]), math.cos(state["theta2"])
+        s3, c3 = math.sin(state["theta3"]), math.cos(state["theta3"])
+        s4, c4 = math.sin(state["theta4"]), math.cos(state["theta4"])
+        w2, w3, w4 = speed, velocity["omega3"], velocity["omega4"]
+        alpha3 = actual["coupler_alpha_rad_s2"]
+        alpha4 = actual["rocker_alpha_rad_s2"]
+        rx = (
+            -a * s2 * alpha2
+            - b * s3 * alpha3
+            + c * s4 * alpha4
+            - a * c2 * w2 * w2
+            - b * c3 * w3 * w3
+            + c * c4 * w4 * w4
+        )
+        ry = (
+            a * c2 * alpha2
+            + b * c3 * alpha3
+            - c * c4 * alpha4
+            - a * s2 * w2 * w2
+            - b * s3 * w3 * w3
+            + c * s4 * w4 * w4
+        )
+>       assert math.hypot(rx, ry) < 1e-9
+E       assert 101.36947461374767 < 1e-09
+E        +  where 101.36947461374767 = <built-in function hypot>(-90.6954219323479, -45.27814952027766)
+E        +    where <built-in function hypot> = math.hypot
+
+/tests/test_outputs.py:771: AssertionError
+____________________ test_c3_centripetal_terms_are_present _____________________
+
+    @case_contract(
+        "CASE-C3-03",
+        "R3",
+        "T10",
+        "`a_Ci` 必须在世界坐标系中计算，不能只取切向项",
+    )
+    def test_c3_centripetal_terms_are_present():
+        """CASE-C3-03 / R3 / T10: assert the quoted world-frame acceleration keeps centripetal terms."""
+        from toggle_linkage.kinematics import solve_acceleration
+    
+        mechanism = _mechanism()
+        speed = 13.0
+        state = _closure_reference(mechanism, 150.0)
+        velocity = _velocity_reference(mechanism, state, speed)
+        expected = _acceleration_reference(mechanism, state, velocity, speed, 0.0)
+        actual = solve_acceleration(mechanism, state, velocity, speed, 0.0)
+        assert abs(expected["alpha4"]) > 1.0
+>       assert math.isclose(
+            actual["rocker_alpha_rad_s2"],
+            expected["alpha4"],
+            rel_tol=1e-11,
+            abs_tol=1e-11,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>(-158.4413930372578, -24.909792363487874, rel_tol=1e-11, abs_tol=1e-11)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:791: AssertionError
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c3_acceleration_matches_reference - ass...
+FAILED ../tests/test_outputs.py::test_c3_acceleration_closure_residual - asse...
+FAILED ../tests/test_outputs.py::test_c3_centripetal_terms_are_present - asse...
+3 failed, 14 deselected in 0.19s

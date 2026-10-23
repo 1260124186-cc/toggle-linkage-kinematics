@@ -1,0 +1,72 @@
+Command: pytest -q /tests/test_outputs.py::test_c3_acceleration_closure_residual
+Mutation: 反转加速度方程第二行摇杆向心项
+File: kinematics.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_c3_acceleration_closure_residual _____________________
+
+    @case_contract(
+        "CASE-C3-02",
+        "R3",
+        "T9",
+        "速度与加速度应分别由该闭环方程的一阶、二阶时间导数求出",
+    )
+    def test_c3_acceleration_closure_residual():
+        """CASE-C3-02 / R3 / T9: assert the quoted second derivative closes in x and y."""
+        from toggle_linkage.kinematics import solve_acceleration
+    
+        mechanism = _mechanism()
+        speed = 10.5
+        alpha2 = -0.7
+        state = _closure_reference(mechanism, 205.0)
+        velocity = _velocity_reference(mechanism, state, speed)
+        actual = solve_acceleration(mechanism, state, velocity, speed, alpha2)
+        a = mechanism["crank_m"]
+        b = mechanism["coupler_m"]
+        c = mechanism["rocker_m"]
+        s2, c2 = math.sin(state["theta2"]), math.cos(state["theta2"])
+        s3, c3 = math.sin(state["theta3"]), math.cos(state["theta3"])
+        s4, c4 = math.sin(state["theta4"]), math.cos(state["theta4"])
+        w2, w3, w4 = speed, velocity["omega3"], velocity["omega4"]
+        alpha3 = actual["coupler_alpha_rad_s2"]
+        alpha4 = actual["rocker_alpha_rad_s2"]
+        rx = (
+            -a * s2 * alpha2
+            - b * s3 * alpha3
+            + c * s4 * alpha4
+            - a * c2 * w2 * w2
+            - b * c3 * w3 * w3
+            + c * c4 * w4 * w4
+        )
+        ry = (
+            a * c2 * alpha2
+            + b * c3 * alpha3
+            - c * c4 * alpha4
+            - a * s2 * w2 * w2
+            - b * s3 * w3 * w3
+            + c * s4 * w4 * w4
+        )
+>       assert math.hypot(rx, ry) < 1e-9
+E       assert 1.7562071485954145 < 1e-09
+E        +  where 1.7562071485954145 = <built-in function hypot>(1.1102230246251565e-15, 1.7562071485954145)
+E        +    where <built-in function hypot> = math.hypot
+
+/tests/test_outputs.py:771: AssertionError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-nln9mgir'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-mkj1iqni'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c3_acceleration_closure_residual - asse...
+1 failed, 2 warnings in 0.06s
+
+stderr:
+

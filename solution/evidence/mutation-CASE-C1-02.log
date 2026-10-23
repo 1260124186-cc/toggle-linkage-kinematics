@@ -1,0 +1,73 @@
+Command: pytest -q /tests/test_outputs.py::test_c1_closure_at_cardinal_angles
+Mutation: 从圆交点投影中删去摇杆长度平方
+File: geometry.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_c1_closure_at_cardinal_angles ______________________
+
+    @case_contract(
+        "CASE-C1-02",
+        "R1",
+        "T2",
+        "`crank*exp(i*crank_angle) + coupler*exp(i*coupler_angle) - rocker*exp(i*rocker_angle) - ground = 0`",
+    )
+    def test_c1_closure_at_cardinal_angles():
+        """CASE-C1-02 / R1 / T2: assert the quoted complex closure equation at four angles."""
+        from toggle_linkage.geometry import solve_closure
+    
+        mechanism = _mechanism(1)
+        residuals = []
+        for angle in (0.0, 90.0, 180.0, 270.0):
+>           state = solve_closure(mechanism, math.radians(angle))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/tests/test_outputs.py:478: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mechanism = {'branch': 1, 'coupler_m': 0.62, 'crank_m': 0.18, 'ground_m': 0.55, ...}
+crank_angle_rad = 0.0
+
+    def solve_closure(mechanism: dict, crank_angle_rad: float) -> dict:
+        """Return both moving joints for the selected assembly branch."""
+        ground = float(mechanism["ground_m"])
+        crank = float(mechanism["crank_m"])
+        coupler = float(mechanism["coupler_m"])
+        rocker = float(mechanism["rocker_m"])
+        branch = int(mechanism["branch"])
+    
+        ax = crank * math.cos(crank_angle_rad)
+        ay = crank * math.sin(crank_angle_rad)
+        dx = ground - ax
+        dy = -ay
+        distance = math.hypot(dx, dy)
+        if distance == 0.0:
+            raise ValueError("crank joint coincides with the fixed pivot")
+        ux, uy = dx / distance, dy / distance
+        along = (coupler * coupler + distance * distance) / (
+            2.0 * distance
+        )
+        height_sq = coupler * coupler - along * along
+        scale = max(coupler * coupler, 1.0)
+        if height_sq < -1e-12 * scale:
+>           raise ValueError("coupler and rocker circles do not intersect")
+E           ValueError: coupler and rocker circles do not intersect
+
+toggle_linkage/geometry.py:59: ValueError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-t3y390wv'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-5w7_h_ae'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c1_closure_at_cardinal_angles - ValueEr...
+1 failed, 2 warnings in 0.05s
+
+stderr:
+

@@ -1,0 +1,71 @@
+Command: pytest -q /tests/test_outputs.py::test_c1_branch_positive_positions
+Mutation: 反转 branch=1 的左侧法向符号
+File: geometry.py
+Exit: 1
+stdout:
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_c1_branch_positive_positions _______________________
+
+    @case_contract(
+        "CASE-C1-01",
+        "R1",
+        "T1",
+        "`branch=1` 选择该线左侧的圆交点",
+    )
+    def test_c1_branch_positive_positions():
+        """CASE-C1-01 / R1 / T1: assert branch=1 selects the quoted left intersection."""
+        from toggle_linkage.geometry import solve_closure
+    
+        mechanism = _mechanism(1)
+        matched = True
+        for angle in (15.0, 100.0, 220.0, 310.0):
+            actual = solve_closure(mechanism, math.radians(angle))
+            expected = _closure_reference(mechanism, angle)
+            matched = matched and math.isclose(
+                actual["coupler_point"][0], expected["B"][0], rel_tol=1e-12, abs_tol=1e-12
+            )
+            matched = matched and math.isclose(
+                actual["coupler_point"][1], expected["B"][1], rel_tol=1e-12, abs_tol=1e-12
+            )
+            matched = matched and math.isclose(
+                actual["coupler_angle_rad"],
+                expected["theta3"],
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+            matched = matched and math.isclose(
+                actual["rocker_angle_rad"],
+                expected["theta4"],
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+        direct = solve_closure(mechanism, math.radians(15.0))
+        direct_expected = _closure_reference(mechanism, 15.0)
+>       assert math.isclose(
+            direct["coupler_point"][0],
+            direct_expected["B"][0],
+            rel_tol=1e-12,
+            abs_tol=1e-12,
+        )
+E       assert False
+E        +  where False = <built-in function isclose>(0.5045773894554664, 0.6225323660202955, rel_tol=1e-12, abs_tol=1e-12)
+E        +    where <built-in function isclose> = math.isclose
+
+/tests/test_outputs.py:450: AssertionError
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:475: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/tests/pytest-cache-files-jmxeq9ar'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:429: PytestCacheWarning: could not create cache path /tests/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/tests/pytest-cache-files-457lnkn1'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../tests/test_outputs.py::test_c1_branch_positive_positions - assert F...
+1 failed, 2 warnings in 0.04s
+
+stderr:
+
